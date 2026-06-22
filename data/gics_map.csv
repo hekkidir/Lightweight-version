@@ -1,0 +1,1083 @@
+Ticker,GICS_Sector,GICS_Industry
+AAPL,Technology,Consumer Electronics
+AAON,Industrials,Building Products & Equipment
+A,Healthcare,Diagnostics & Research
+ABAT,Industrials,Waste Management
+AAL,Industrials,Airlines
+AA,Basic Materials,Aluminum
+ABCL,Healthcare,Biotechnology
+AAOI,Technology,Communication Equipment
+ABNB,Consumer Cyclical,Travel Services
+ABT,Healthcare,Medical Devices
+ACHR,Industrials,Aerospace & Defense
+ACI,Consumer Defensive,Grocery Stores
+ACIW,Technology,Software - Infrastructure
+ACLS,Technology,Semiconductor Equipment & Materials
+ACMR,Technology,Semiconductor Equipment & Materials
+ACM,Industrials,Engineering & Construction
+ACN,Technology,Information Technology Services
+ADEA,Technology,Software - Application
+ADBE,Technology,Software - Application
+ADM,Consumer Defensive,Farm Products
+ADSK,Technology,Software - Application
+ADP,Technology,Software - Application
+ADI,Technology,Semiconductors
+ADT,Industrials,Security & Protection Services
+ADTN,Technology,Communication Equipment
+AEHR,Technology,Semiconductor Equipment & Materials
+ADUR,Industrials,Pollution & Treatment Controls
+AEIS,Industrials,Electrical Equipment & Parts
+AEM,Basic Materials,Gold
+AEP,Utilities,Utilities - Regulated Electric
+AEO,Consumer Cyclical,Apparel Retail
+AER,Industrials,Rental & Leasing Services
+AEVA,Technology,Software - Infrastructure
+AFRM,Financial Services,Credit Services
+AG,Basic Materials,Silver
+AGCO,Industrials,Farm & Heavy Construction Machinery
+AGRO,Consumer Defensive,Farm Products
+AGI,Basic Materials,Gold
+AI,Technology,Software - Infrastructure
+AIP,Technology,Semiconductors
+AKAM,Technology,Software - Infrastructure
+ALAB,Technology,Semiconductors
+ALB,Basic Materials,Specialty Chemicals
+ALK,Industrials,Airlines
+ALGM,Technology,Semiconductors
+ALLE,Industrials,Security & Protection Services
+ALM,Basic Materials,Other Industrial Metals & Mining
+ALKT,Technology,Software - Application
+ALNY,Healthcare,Biotechnology
+ALOT,Technology,Computer Hardware
+ALOY,Basic Materials,Other Industrial Metals & Mining
+ALMU,Technology,Semiconductors
+ALRM,Technology,Software - Application
+ALTO,Basic Materials,Specialty Chemicals
+AMAT,Technology,Semiconductor Equipment & Materials
+AMBA,Technology,Semiconductor Equipment & Materials
+AMBQ,Technology,Semiconductors
+AMD,Technology,Semiconductors
+AMCR,Consumer Cyclical,Packaging & Containers
+AME,Industrials,Specialty Industrial Machinery
+AMKR,Technology,Semiconductor Equipment & Materials
+AMPL,Technology,Software - Application
+AMPX,Industrials,Electrical Equipment & Parts
+AMR,Basic Materials,Coking Coal
+AMRZ,Basic Materials,Building Materials
+AMX,Communication Services,Telecom Services
+AMT,Real Estate,REIT - Specialty
+AMSC,Industrials,Specialty Industrial Machinery
+AMZN,Consumer Cyclical,Internet Retail
+ANDE,Consumer Defensive,Food Distribution
+AOS,Industrials,Specialty Industrial Machinery
+ANET,Technology,Computer Hardware
+ANF,Consumer Cyclical,Apparel Retail
+AOSL,Technology,Semiconductors
+APD,Basic Materials,Specialty Chemicals
+APH,Technology,Electronic Components
+APG,Industrials,Engineering & Construction
+APLD,Technology,Information Technology Services
+APPF,Technology,Software - Application
+APP,Communication Services,Advertising Agencies
+APPN,Technology,Software - Infrastructure
+AREC,Basic Materials,Coking Coal
+ARIS,Basic Materials,Gold
+ARLO,Industrials,Building Products & Equipment
+ARLP,Energy,Thermal Coal
+ARM,Technology,Semiconductors
+ARMK,Industrials,Specialty Business Services
+ARQQ,Technology,Software - Infrastructure
+ARRY,Technology,Solar
+ASAN,Technology,Software - Application
+ARWR,Healthcare,Biotechnology
+ASH,Basic Materials,Specialty Chemicals
+ASM,Basic Materials,Other Precious Metals & Mining
+ASML,Technology,Semiconductor Equipment & Materials
+ASIX,Basic Materials,Chemicals
+ASPI,Basic Materials,Chemicals
+ASTS,Technology,Communication Equipment
+ATAT,Consumer Cyclical,Lodging
+ATEN,Technology,Software - Infrastructure
+ASX,Technology,Semiconductors
+ATHM,Communication Services,Internet Content & Information
+ATLX,Basic Materials,Other Industrial Metals & Mining
+ATI,Industrials,Metal Fabrication
+ATKR,Industrials,Electrical Equipment & Parts
+ATOM,Technology,Semiconductor Equipment & Materials
+AU,Basic Materials,Gold
+AUR,Consumer Cyclical,Auto Parts
+AUGO,Basic Materials,Gold
+AVGO,Technology,Semiconductors
+AVT,Technology,Electronics & Computer Distribution
+AVNT,Basic Materials,Specialty Chemicals
+AVPT,Technology,Software - Infrastructure
+AXTA,Basic Materials,Specialty Chemicals
+AXTI,Technology,Semiconductor Equipment & Materials
+AYI,Industrials,Electrical Equipment & Parts
+AZTA,Healthcare,Medical Instruments & Supplies
+BABA,Consumer Cyclical,Internet Retail
+BA,Industrials,Aerospace & Defense
+BALL,Consumer Cyclical,Packaging & Containers
+B,Basic Materials,Gold
+BB,Technology,Software - Infrastructure
+BBIO,Healthcare,Biotechnology
+BBAI,Technology,Information Technology Services
+BARK,Consumer Cyclical,Specialty Retail
+BBWI,Consumer Cyclical,Specialty Retail
+BCE,Communication Services,Telecom Services
+BBY,Consumer Cyclical,Specialty Retail
+BDC,Technology,Communication Equipment
+BEAM,Healthcare,Biotechnology
+BE,Industrials,Electrical Equipment & Parts
+BG,Consumer Defensive,Farm Products
+BEKE,Real Estate,Real Estate Services
+BHP,Basic Materials,Other Industrial Metals & Mining
+BIDU,Communication Services,Internet Content & Information
+BJ,Consumer Defensive,Discount Stores
+BILI,Communication Services,Internet Content & Information
+BIRK,Consumer Cyclical,Footwear & Accessories
+BKD,Healthcare,Medical Care Facilities
+BILL,Technology,Software - Application
+BKSY,Industrials,Specialty Business Services
+BKNG,Consumer Cyclical,Travel Services
+BL,Technology,Software - Application
+BLDR,Industrials,Building Products & Equipment
+BMBL,Communication Services,Internet Content & Information
+BMI,Technology,Scientific & Technical Instruments
+BMM,Basic Materials,Other Industrial Metals & Mining
+BMRN,Healthcare,Biotechnology
+BMNR,Financial Services,Capital Markets
+BOX,Technology,Software - Infrastructure
+BR,Technology,Information Technology Services
+BP,Energy,Oil & Gas Integrated
+BRZE,Technology,Software - Application
+BSY,Technology,Software - Application
+BTDR,Technology,Software - Application
+BTG,Basic Materials,Gold
+BSX,Healthcare,Medical Devices
+BTBT,Financial Services,Capital Markets
+BTI,Consumer Defensive,Tobacco
+BTU,Energy,Thermal Coal
+BUD,Consumer Defensive,Beverages - Brewers
+BULL,Technology,Software - Application
+BVN,Basic Materials,Other Precious Metals & Mining
+BWXT,Industrials,Aerospace & Defense
+BW,Industrials,Specialty Industrial Machinery
+BZ,Communication Services,Internet Content & Information
+CALM,Consumer Defensive,Farm Products
+BZAI,Technology,Software - Application
+CALX,Technology,Software - Infrastructure
+CART,Consumer Cyclical,Internet Retail
+CAR,Industrials,Rental & Leasing Services
+CARG,Consumer Cyclical,Auto & Truck Dealerships
+CAT,Industrials,Farm & Heavy Construction Machinery
+CARR,Industrials,Building Products & Equipment
+CBRE,Real Estate,Real Estate Services
+CBT,Basic Materials,Specialty Chemicals
+CBZ,Industrials,Specialty Business Services
+CC,Basic Materials,Specialty Chemicals
+CCC,Technology,Software - Application
+CCI,Real Estate,REIT - Specialty
+CCEP,Consumer Defensive,Beverages - Non-Alcoholic
+CCJ,Energy,Uranium
+CCK,Consumer Cyclical,Packaging & Containers
+CCL,Consumer Cyclical,Travel Services
+CCOI,Communication Services,Telecom Services
+CDE,Basic Materials,Gold
+CDW,Technology,Information Technology Services
+CDNS,Technology,Software - Application
+CE,Basic Materials,Chemicals
+CEG,Utilities,Utilities - Independent Power Producers
+CELH,Consumer Defensive,Beverages - Non-Alcoholic
+CENX,Basic Materials,Aluminum
+CF,Basic Materials,Agricultural Inputs
+CGNX,Technology,Scientific & Technical Instruments
+CGAU,Basic Materials,Gold
+CHPT,Consumer Cyclical,Specialty Retail
+CHD,Consumer Defensive,Household & Personal Products
+CHRW,Industrials,Integrated Freight & Logistics
+CHTR,Communication Services,Telecom Services
+CHWY,Consumer Cyclical,Internet Retail
+CIEN,Technology,Communication Equipment
+CHYM,Technology,Software - Application
+CIFR,Technology,Information Technology Services
+CLF,Basic Materials,Steel
+CLMT,Basic Materials,Specialty Chemicals
+CLSK,Financial Services,Capital Markets
+CL,Consumer Defensive,Household & Personal Products
+CLS,Technology,Electronic Components
+CLX,Consumer Defensive,Household & Personal Products
+CMBT,Energy,Oil & Gas Midstream
+CMC,Industrials,Metal Fabrication
+CNC,Healthcare,Healthcare Plans
+CMCSA,Communication Services,Telecom Services
+CMI,Industrials,Specialty Industrial Machinery
+CNH,Industrials,Farm & Heavy Construction Machinery
+CNI,Industrials,Railroads
+CNR,Energy,Thermal Coal
+CNM,Industrials,Industrial Distribution
+CNXC,Technology,Information Technology Services
+COHR,Technology,Scientific & Technical Instruments
+COCO,Consumer Defensive,Beverages - Non-Alcoholic
+COIN,Financial Services,Financial Data & Stock Exchanges
+COHU,Technology,Semiconductor Equipment & Materials
+COP,Energy,Oil & Gas E&P
+COLD,Real Estate,REIT - Industrial
+COMP,Real Estate,Real Estate Services
+CORT,Healthcare,Biotechnology
+CORZ,Technology,Software - Infrastructure
+COST,Consumer Defensive,Discount Stores
+COTY,Consumer Defensive,Household & Personal Products
+COUR,Consumer Defensive,Education & Training Services
+CP,Industrials,Railroads
+CPRI,Consumer Cyclical,Luxury Goods
+CPRT,Industrials,Specialty Business Services
+CPNG,Consumer Cyclical,Internet Retail
+CRCL,Financial Services,Capital Markets
+CRDO,Technology,Semiconductors
+CRH,Basic Materials,Building Materials
+CRM,Technology,Software - Application
+CRML,Basic Materials,Other Industrial Metals & Mining
+CRNC,Technology,Software - Application
+CRS,Industrials,Metal Fabrication
+CRSP,Healthcare,Biotechnology
+CRTO,Communication Services,Advertising Agencies
+CRUS,Technology,Semiconductors
+CRWD,Technology,Software - Infrastructure
+CRWV,Technology,Software - Infrastructure
+CSCO,Technology,Communication Equipment
+CSIQ,Technology,Solar
+CSGP,Real Estate,Real Estate Services
+CSTM,Basic Materials,Aluminum
+CTAS,Industrials,Specialty Business Services
+CTOS,Industrials,Rental & Leasing Services
+CSX,Industrials,Railroads
+CTRE,Real Estate,REIT - Healthcare Facilities
+CTSH,Technology,Information Technology Services
+CTVA,Basic Materials,Agricultural Inputs
+CVNA,Consumer Cyclical,Auto & Truck Dealerships
+CVS,Healthcare,Healthcare Plans
+CVLT,Technology,Software - Application
+CWK,Real Estate,Real Estate Services
+CVX,Energy,Oil & Gas Integrated
+CWAN,Technology,Software - Application
+CWST,Industrials,Waste Management
+CX,Basic Materials,Building Materials
+CXM,Technology,Software - Application
+CXT,Industrials,Specialty Industrial Machinery
+CXW,Industrials,Security & Protection Services
+DAC,Industrials,Marine Shipping
+D,Utilities,Utilities - Regulated Electric
+DAL,Industrials,Airlines
+DASH,Consumer Cyclical,Internet Retail
+DBX,Technology,Software - Infrastructure
+DD,Basic Materials,Specialty Chemicals
+DDOG,Technology,Software - Application
+DECK,Consumer Cyclical,Footwear & Accessories
+DE,Industrials,Farm & Heavy Construction Machinery
+DFTX,Healthcare,Biotechnology
+DELL,Technology,Computer Hardware
+DG,Consumer Defensive,Discount Stores
+DHI,Consumer Cyclical,Residential Construction
+DHR,Healthcare,Diagnostics & Research
+DHT,Energy,Oil & Gas Midstream
+DLB,Industrials,Specialty Business Services
+DJT,Communication Services,Internet Content & Information
+DKS,Consumer Cyclical,Specialty Retail
+DIOD,Technology,Semiconductors
+DLO,Technology,Software - Infrastructure
+DLR,Real Estate,REIT - Specialty
+DLTR,Consumer Defensive,Discount Stores
+DNN,Energy,Uranium
+DNOW,Industrials,Industrial Distribution
+DOCS,Healthcare,Health Information Services
+DOCN,Technology,Software - Infrastructure
+DOV,Industrials,Specialty Industrial Machinery
+DOW,Basic Materials,Chemicals
+DRVN,Consumer Cyclical,Auto & Truck Dealerships
+DOCU,Technology,Software - Application
+DOX,Technology,Software - Infrastructure
+DT,Technology,Software - Application
+DUK,Utilities,Utilities - Regulated Electric
+DUOL,Technology,Software - Application
+DV,Communication Services,Advertising Agencies
+DXC,Technology,Information Technology Services
+EA,Communication Services,Electronic Gaming & Multimedia
+DXCM,Healthcare,Medical Devices
+DVN,Energy,Oil & Gas E&P
+EAF,Industrials,Electrical Equipment & Parts
+ECVT,Basic Materials,Specialty Chemicals
+ECL,Basic Materials,Specialty Chemicals
+EBAY,Consumer Cyclical,Internet Retail
+EDU,Consumer Defensive,Education & Training Services
+EEFT,Technology,Software - Infrastructure
+EGO,Basic Materials,Gold
+EH,Industrials,Aerospace & Defense
+EL,Consumer Defensive,Household & Personal Products
+ELF,Consumer Defensive,Household & Personal Products
+ELV,Healthcare,Healthcare Plans
+ELVR,Basic Materials,Other Industrial Metals & Mining
+ELAN,Healthcare,Drug Manufacturers - Specialty & Generic
+EMN,Basic Materials,Specialty Chemicals
+ENPH,Technology,Solar
+EMR,Industrials,Specialty Industrial Machinery
+ENR,Industrials,Electrical Equipment & Parts
+ENSG,Healthcare,Medical Care Facilities
+ENVX,Industrials,Electrical Equipment & Parts
+ENTG,Technology,Semiconductor Equipment & Materials
+EOG,Energy,Oil & Gas E&P
+EOSE,Industrials,Electrical Equipment & Parts
+EPAM,Technology,Information Technology Services
+EPD,Energy,Oil & Gas Midstream
+EQPT,Industrials,Rental & Leasing Services
+EQIX,Real Estate,REIT - Specialty
+EQNR,Energy,Oil & Gas Integrated
+EQX,Basic Materials,Gold
+ERO,Basic Materials,Copper
+ERIC,Technology,Communication Equipment
+ESI,Basic Materials,Specialty Chemicals
+ET,Energy,Oil & Gas Midstream
+ESTC,Technology,Software - Application
+ETN,Industrials,Specialty Industrial Machinery
+EU,Energy,Uranium
+ETSY,Consumer Cyclical,Internet Retail
+EW,Healthcare,Medical Devices
+EVLV,Industrials,Security & Protection Services
+EXK,Basic Materials,Silver
+EXC,Utilities,Utilities - Regulated Electric
+EXLS,Technology,Information Technology Services
+EXPD,Industrials,Integrated Freight & Logistics
+EXTR,Technology,Communication Equipment
+EXPGY,Industrials,Consulting Services
+EXPE,Consumer Cyclical,Travel Services
+F,Consumer Cyclical,Auto Manufacturers
+FBIN,Industrials,Building Products & Equipment
+FA,Industrials,Specialty Business Services
+FANG,Energy,Oil & Gas E&P
+FAST,Industrials,Industrial Distribution
+FCX,Basic Materials,Copper
+FDX,Industrials,Integrated Freight & Logistics
+FCEL,Industrials,Electrical Equipment & Parts
+FEIM,Technology,Communication Equipment
+FER,Industrials,Engineering & Construction
+FERG,Industrials,Industrial Distribution
+FFIV,Technology,Software - Infrastructure
+FICO,Technology,Software - Application
+FIG,Technology,Software - Application
+FIS,Technology,Information Technology Services
+FIVE,Consumer Cyclical,Specialty Retail
+FIGS,Consumer Cyclical,Apparel Manufacturing
+FIVN,Technology,Software - Infrastructure
+FIX,Industrials,Engineering & Construction
+FLNC,Utilities,Utilities - Renewable
+FLEX,Technology,Electronic Components
+FLR,Industrials,Engineering & Construction
+FLY,Industrials,Aerospace & Defense
+FLYW,Technology,Software - Infrastructure
+FLS,Industrials,Specialty Industrial Machinery
+FMC,Basic Materials,Agricultural Inputs
+FNV,Basic Materials,Gold
+FORM,Technology,Semiconductor Equipment & Materials
+FOUR,Technology,Software - Infrastructure
+FRMI,Real Estate,REIT - Specialty
+FPS,Industrials,Electrical Equipment & Parts
+FROG,Technology,Software - Application
+FRSH,Technology,Software - Application
+FRO,Energy,Oil & Gas Midstream
+FSLY,Technology,Software - Application
+FSLR,Technology,Solar
+FRPT,Consumer Defensive,Packaged Foods
+FTNT,Technology,Software - Infrastructure
+FSM,Basic Materials,Gold
+FTV,Technology,Scientific & Technical Instruments
+FWRD,Industrials,Integrated Freight & Logistics
+FUBO,Communication Services,Broadcasting
+G,Technology,Information Technology Services
+GD,Industrials,Aerospace & Defense
+GDDY,Technology,Software - Infrastructure
+GE,Industrials,Aerospace & Defense
+GDS,Technology,Information Technology Services
+GDYN,Technology,Information Technology Services
+GEN,Technology,Software - Infrastructure
+GEHC,Healthcare,Medical Devices
+GENI,Communication Services,Internet Content & Information
+GEO,Industrials,Security & Protection Services
+GEV,Industrials,Specialty Industrial Machinery
+GFI,Basic Materials,Gold
+GFS,Technology,Semiconductors
+GFL,Industrials,Waste Management
+GGB,Basic Materials,Steel
+GGG,Industrials,Specialty Industrial Machinery
+GLNG,Energy,Oil & Gas Midstream
+GLOB,Technology,Information Technology Services
+GLW,Technology,Electronic Components
+GLXY,Financial Services,Capital Markets
+GM,Consumer Cyclical,Auto Manufacturers
+GNRC,Industrials,Specialty Industrial Machinery
+GOOG,Communication Services,Internet Content & Information
+GOOGL,Communication Services,Internet Content & Information
+GME,Consumer Cyclical,Specialty Retail
+GPC,Consumer Cyclical,Auto Parts
+GPGI,Industrials,Metal Fabrication
+GPK,Consumer Cyclical,Packaging & Containers
+GPN,Industrials,Specialty Business Services
+GPRE,Basic Materials,Chemicals
+GPRO,Technology,Consumer Electronics
+GRMN,Technology,Scientific & Technical Instruments
+GRAB,Technology,Software - Application
+GROY,Basic Materials,Gold
+GRRR,Technology,Software - Infrastructure
+GRND,Technology,Software - Application
+GSIT,Technology,Semiconductors
+GSAT,Communication Services,Telecom Services
+GT,Consumer Cyclical,Auto Parts
+GTES,Industrials,Specialty Industrial Machinery
+GTLB,Technology,Software - Infrastructure
+GTLS,Industrials,Specialty Industrial Machinery
+GTM,Technology,Software - Application
+GWRE,Technology,Software - Application
+GXO,Industrials,Integrated Freight & Logistics
+H,Consumer Cyclical,Lodging
+HAFN,Industrials,Marine Shipping
+HBM,Basic Materials,Copper
+HAL,Energy,Oil & Gas Equipment & Services
+HAYW,Industrials,Electrical Equipment & Parts
+HCC,Basic Materials,Coking Coal
+HCA,Healthcare,Medical Care Facilities
+HD,Consumer Cyclical,Home Improvement Retail
+HII,Industrials,Aerospace & Defense
+HL,Basic Materials,Other Precious Metals & Mining
+HIMX,Technology,Semiconductors
+HLIT,Technology,Communication Equipment
+HIVE,Financial Services,Capital Markets
+HLMN,Industrials,Tools & Accessories
+HLT,Consumer Cyclical,Lodging
+HMC,Consumer Cyclical,Auto Manufacturers
+HIMS,Healthcare,Drug Manufacturers - Specialty & Generic
+HNGE,Healthcare,Health Information Services
+HMY,Basic Materials,Gold
+HON,Industrials,Conglomerates
+HOG,Consumer Cyclical,Recreational Vehicles
+HPE,Technology,Communication Equipment
+HSAI,Consumer Cyclical,Auto Parts
+HPQ,Technology,Computer Hardware
+HSY,Consumer Defensive,Confectioners
+HTZ,Industrials,Rental & Leasing Services
+HUBS,Technology,Software - Application
+HUBB,Industrials,Electrical Equipment & Parts
+HUBG,Industrials,Integrated Freight & Logistics
+HTHT,Consumer Cyclical,Lodging
+HUM,Healthcare,Healthcare Plans
+HUN,Basic Materials,Chemicals
+HUT,Financial Services,Capital Markets
+HYMC,Basic Materials,Gold
+HWM,Industrials,Aerospace & Defense
+IAC,Communication Services,Internet Content & Information
+IBM,Technology,Information Technology Services
+ICL,Basic Materials,Agricultural Inputs
+IAG,Basic Materials,Gold
+IDR,Basic Materials,Gold
+ICHR,Technology,Semiconductor Equipment & Materials
+IE,Basic Materials,Copper
+IDCC,Technology,Software - Application
+IDXX,Healthcare,Diagnostics & Research
+IEX,Industrials,Specialty Industrial Machinery
+IFF,Basic Materials,Specialty Chemicals
+ILMN,Healthcare,Diagnostics & Research
+IHS,Real Estate,Real Estate Services
+IMOS,Technology,Semiconductors
+IMVT,Healthcare,Biotechnology
+IMSR,Utilities,Utilities - Regulated Electric
+INFQ,Technology,Software - Infrastructure
+INGR,Consumer Defensive,Packaged Foods
+INGM,Technology,Information Technology Services
+INOD,Technology,Information Technology Services
+INFY,Technology,Information Technology Services
+INSM,Healthcare,Biotechnology
+INTA,Technology,Software - Application
+INTU,Technology,Software - Application
+INTC,Technology,Semiconductors
+IONQ,Technology,Computer Hardware
+IONS,Healthcare,Biotechnology
+IOSP,Basic Materials,Specialty Chemicals
+IOT,Technology,Software - Infrastructure
+IOVA,Healthcare,Biotechnology
+IP,Consumer Cyclical,Packaging & Containers
+IPGP,Technology,Semiconductor Equipment & Materials
+IPWR,Technology,Semiconductors
+IPI,Basic Materials,Agricultural Inputs
+IR,Industrials,Specialty Industrial Machinery
+IRM,Real Estate,REIT - Specialty
+IRDM,Communication Services,Telecom Services
+IREN,Financial Services,Capital Markets
+ITRI,Technology,Scientific & Technical Instruments
+ISRG,Healthcare,Medical Instruments & Supplies
+ITW,Industrials,Specialty Industrial Machinery
+IT,Technology,Information Technology Services
+J,Industrials,Engineering & Construction
+ITT,Industrials,Specialty Industrial Machinery
+JBHT,Industrials,Integrated Freight & Logistics
+JAZZ,Healthcare,Biotechnology
+JBL,Technology,Electronic Components
+JCI,Industrials,Building Products & Equipment
+JBLU,Industrials,Airlines
+JD,Consumer Cyclical,Internet Retail
+JHX,Basic Materials,Building Materials
+JKHY,Technology,Information Technology Services
+JOBY,Industrials,Airports & Air Services
+KBH,Consumer Cyclical,Residential Construction
+KC,Technology,Software - Application
+KBR,Industrials,Engineering & Construction
+KD,Technology,Information Technology Services
+KEEL,Technology,Information Technology Services
+KDP,Consumer Defensive,Beverages - Non-Alcoholic
+KGC,Basic Materials,Gold
+KDK,Technology,Software - Infrastructure
+KEYS,Technology,Scientific & Technical Instruments
+KLAC,Technology,Semiconductor Equipment & Materials
+KLAR,Technology,Software - Infrastructure
+KLIC,Technology,Semiconductor Equipment & Materials
+KMB,Consumer Defensive,Household & Personal Products
+KMI,Energy,Oil & Gas Midstream
+KMT,Industrials,Tools & Accessories
+KNX,Industrials,Trucking
+KO,Consumer Defensive,Beverages - Non-Alcoholic
+KMX,Consumer Cyclical,Auto & Truck Dealerships
+KODK,Industrials,Specialty Business Services
+KR,Consumer Defensive,Grocery Stores
+KT,Communication Services,Telecom Services
+KTOS,Industrials,Aerospace & Defense
+KVHI,Communication Services,Telecom Services
+KVUE,Consumer Defensive,Household & Personal Products
+KVYO,Technology,Software - Application
+KYIV,Communication Services,Telecom Services
+LAC,Basic Materials,Other Industrial Metals & Mining
+KW,Real Estate,Real Estate Services
+LAES,Technology,Semiconductors
+LASR,Technology,Semiconductors
+LAR,Basic Materials,Other Industrial Metals & Mining
+LAUR,Consumer Defensive,Education & Training Services
+LCID,Consumer Cyclical,Auto Manufacturers
+LEN,Consumer Cyclical,Residential Construction
+LEU,Energy,Uranium
+LFUS,Technology,Electronic Components
+LGIH,Consumer Cyclical,Residential Construction
+LGO,Basic Materials,Other Industrial Metals & Mining
+LGN,Industrials,Engineering & Construction
+LHX,Industrials,Aerospace & Defense
+LIF,Technology,Software - Application
+LI,Consumer Cyclical,Auto Manufacturers
+LION,Unknown,Unknown
+LIN,Basic Materials,Specialty Chemicals
+LITE,Technology,Communication Equipment
+LKQ,Consumer Cyclical,Auto Parts
+LMT,Industrials,Aerospace & Defense
+LNG,Energy,Oil & Gas Midstream
+LOGI,Technology,Computer Hardware
+LOW,Consumer Cyclical,Home Improvement Retail
+LPX,Industrials,Building Products & Equipment
+LPL,Technology,Consumer Electronics
+LPTH,Technology,Electronic Components
+LRCX,Technology,Semiconductor Equipment & Materials
+LRLCY,Consumer Defensive,Household & Personal Products
+LRN,Consumer Defensive,Education & Training Services
+LSCC,Technology,Semiconductors
+LTBR,Industrials,Electrical Equipment & Parts
+LSPD,Technology,Software - Application
+LTC,Real Estate,REIT - Healthcare Facilities
+LTM,Industrials,Airlines
+LULU,Consumer Cyclical,Apparel Retail
+LUMN,Communication Services,Telecom Services
+LUNR,Industrials,Aerospace & Defense
+LUV,Industrials,Airlines
+LWLG,Basic Materials,Specialty Chemicals
+LXU,Basic Materials,Chemicals
+LYB,Basic Materials,Specialty Chemicals
+LYSDY,Basic Materials,Other Industrial Metals & Mining
+LYFT,Technology,Software - Application
+LZ,Industrials,Specialty Business Services
+MANH,Technology,Software - Application
+MAN,Industrials,Staffing & Employment Services
+MAS,Industrials,Building Products & Equipment
+MAR,Consumer Cyclical,Lodging
+MBLY,Consumer Cyclical,Auto Parts
+MCHP,Technology,Semiconductors
+MATX,Industrials,Marine Shipping
+MDB,Technology,Software - Infrastructure
+MCK,Healthcare,Medical Distribution
+MDLZ,Consumer Defensive,Confectioners
+MDT,Healthcare,Medical Devices
+MELI,Consumer Cyclical,Internet Retail
+MEOH,Basic Materials,Chemicals
+META,Communication Services,Internet Content & Information
+METC,Basic Materials,Coking Coal
+MGA,Consumer Cyclical,Auto Parts
+MGNI,Communication Services,Advertising Agencies
+MKSI,Technology,Scientific & Technical Instruments
+MIR,Industrials,Specialty Industrial Machinery
+MLI,Industrials,Metal Fabrication
+MMM,Industrials,Conglomerates
+MMYT,Consumer Cyclical,Travel Services
+MNST,Consumer Defensive,Beverages - Non-Alcoholic
+MMS,Industrials,Specialty Business Services
+MO,Consumer Defensive,Tobacco
+MOD,Consumer Cyclical,Auto Parts
+MPC,Energy,Oil & Gas Refining & Marketing
+MP,Basic Materials,Other Industrial Metals & Mining
+MPTI,Technology,Electronic Components
+MPWR,Technology,Semiconductors
+MQ,Technology,Software - Infrastructure
+MRAM,Technology,Semiconductors
+MRNA,Healthcare,Biotechnology
+MOS,Basic Materials,Agricultural Inputs
+MRVL,Technology,Semiconductors
+MSFT,Technology,Software - Infrastructure
+MSI,Technology,Communication Equipment
+MSTR,Technology,Software - Application
+MRTN,Industrials,Trucking
+MT,Basic Materials,Steel
+MTCH,Communication Services,Internet Content & Information
+MTRN,Basic Materials,Other Industrial Metals & Mining
+MTH,Consumer Cyclical,Residential Construction
+MTZ,Industrials,Engineering & Construction
+MTSI,Technology,Semiconductors
+MU,Technology,Semiconductors
+MUSA,Consumer Cyclical,Specialty Retail
+MWA,Industrials,Specialty Industrial Machinery
+MUX,Basic Materials,Other Precious Metals & Mining
+NABL,Technology,Information Technology Services
+MX,Technology,Semiconductors
+NAT,Energy,Oil & Gas Midstream
+NAVN,Technology,Software - Application
+MXL,Technology,Semiconductors
+NATL,Technology,Software - Application
+NB,Basic Materials,Other Industrial Metals & Mining
+NBIS,Communication Services,Internet Content & Information
+NCLH,Consumer Cyclical,Travel Services
+NCNO,Technology,Software - Application
+NDSN,Industrials,Specialty Industrial Machinery
+NEM,Basic Materials,Gold
+NET,Technology,Software - Infrastructure
+NEE,Utilities,Utilities - Regulated Electric
+NEWP,Basic Materials,Silver
+NEXA,Basic Materials,Other Industrial Metals & Mining
+NFLX,Communication Services,Entertainment
+NG,Basic Materials,Gold
+NGNE,Healthcare,Biotechnology
+NHI,Real Estate,REIT - Healthcare Facilities
+NIO,Consumer Cyclical,Auto Manufacturers
+NIQ,Unknown,Unknown
+NKLR,Utilities,Utilities - Regulated Electric
+NMRK,Real Estate,Real Estate Services
+NN,Technology,Software - Infrastructure
+NOC,Industrials,Aerospace & Defense
+NNE,Industrials,Specialty Industrial Machinery
+NOK,Technology,Communication Equipment
+NOMD,Consumer Defensive,Packaged Foods
+NOW,Technology,Software - Application
+NSC,Industrials,Railroads
+NSP,Industrials,Staffing & Employment Services
+NTAP,Technology,Software - Infrastructure
+NTES,Communication Services,Electronic Gaming & Multimedia
+NTNX,Technology,Software - Infrastructure
+NTR,Basic Materials,Agricultural Inputs
+NTSK,Technology,Software - Infrastructure
+NU,Financial Services,Banks - Regional
+NUE,Basic Materials,Steel
+NVEC,Technology,Semiconductors
+NVRI,Industrials,Waste Management
+NVDA,Technology,Semiconductors
+NVTS,Technology,Semiconductors
+NVT,Industrials,Electrical Equipment & Parts
+NWL,Consumer Defensive,Household & Personal Products
+NXE,Energy,Uranium
+NXT,Technology,Solar
+NXPI,Technology,Semiconductors
+OC,Industrials,Building Products & Equipment
+OCC,Technology,Communication Equipment
+ODFL,Industrials,Trucking
+OHI,Real Estate,REIT - Healthcare Facilities
+OKLO,Utilities,Utilities - Independent Power Producers
+OI,Consumer Cyclical,Packaging & Containers
+OKTA,Technology,Software - Infrastructure
+OLED,Technology,Electronic Components
+OMC,Communication Services,Advertising Agencies
+OLN,Basic Materials,Chemicals
+OLLI,Consumer Defensive,Discount Stores
+ONDS,Technology,Communication Equipment
+ON,Technology,Semiconductors
+OR,Basic Materials,Gold
+ONTO,Technology,Semiconductor Equipment & Materials
+OPEN,Real Estate,Real Estate Services
+ORCL,Technology,Software - Infrastructure
+ORLA,Basic Materials,Gold
+ORLY,Consumer Cyclical,Auto Parts
+OTEX,Technology,Software - Application
+OTIS,Industrials,Specialty Industrial Machinery
+P,Technology,Computer Hardware
+OXY,Energy,Oil & Gas E&P
+OUST,Technology,Electronic Components
+PAGS,Technology,Software - Infrastructure
+PAAS,Basic Materials,Gold
+PAHC,Healthcare,Drug Manufacturers - Specialty & Generic
+PANW,Technology,Software - Infrastructure
+PATH,Technology,Software - Infrastructure
+PAYC,Technology,Software - Application
+PAYO,Technology,Software - Infrastructure
+PAYP,Technology,Software - Infrastructure
+PAYX,Technology,Software - Application
+PCAR,Industrials,Farm & Heavy Construction Machinery
+PBI,Industrials,Integrated Freight & Logistics
+PCOR,Technology,Software - Application
+PDD,Consumer Cyclical,Internet Retail
+PCG,Utilities,Utilities - Regulated Electric
+PCTY,Technology,Software - Application
+PDYN,Technology,Software - Infrastructure
+PCT,Industrials,Pollution & Treatment Controls
+PEGA,Technology,Software - Application
+PENG,Technology,Information Technology Services
+PEP,Consumer Defensive,Beverages - Non-Alcoholic
+PETS,Healthcare,Pharmaceutical Retailers
+PG,Consumer Defensive,Household & Personal Products
+PFGC,Consumer Defensive,Food Distribution
+PINS,Communication Services,Internet Content & Information
+PGY,Technology,Software - Infrastructure
+PKG,Consumer Cyclical,Packaging & Containers
+PHM,Consumer Cyclical,Residential Construction
+PL,Industrials,Aerospace & Defense
+PLAB,Technology,Semiconductor Equipment & Materials
+PLPC,Industrials,Electrical Equipment & Parts
+PLNT,Consumer Cyclical,Leisure
+PLTR,Technology,Software - Infrastructure
+PLXS,Technology,Electronic Components
+PLUG,Industrials,Electrical Equipment & Parts
+PNR,Industrials,Specialty Industrial Machinery
+PM,Consumer Defensive,Tobacco
+POET,Technology,Semiconductors
+PONY,Technology,Information Technology Services
+POOL,Industrials,Industrial Distribution
+POWI,Technology,Semiconductors
+PPG,Basic Materials,Specialty Chemicals
+POWL,Industrials,Electrical Equipment & Parts
+PPTA,Basic Materials,Other Precious Metals & Mining
+PRGS,Technology,Software - Infrastructure
+PRIM,Industrials,Engineering & Construction
+PRM,Basic Materials,Specialty Chemicals
+PRMB,Consumer Defensive,Beverages - Non-Alcoholic
+PSKY,Communication Services,Entertainment
+PTRN,Technology,Software - Application
+PTC,Technology,Software - Application
+PUBM,Technology,Software - Application
+PYPL,Financial Services,Credit Services
+Q,Technology,Semiconductor Equipment & Materials
+PWR,Industrials,Engineering & Construction
+QCOM,Technology,Semiconductors
+QBTS,Technology,Computer Hardware
+QLYS,Technology,Software - Infrastructure
+QMCO,Technology,Computer Hardware
+QRVO,Technology,Semiconductors
+QTWO,Technology,Software - Application
+QUBT,Technology,Computer Hardware
+QS,Consumer Cyclical,Auto Parts
+QXO,Industrials,Industrial Distribution
+RBA,Industrials,Specialty Business Services
+RAL,Technology,Electronic Components
+RBBN,Technology,Software - Application
+RBLX,Communication Services,Electronic Gaming & Multimedia
+RCI,Communication Services,Telecom Services
+RCL,Consumer Cyclical,Travel Services
+RBRK,Technology,Software - Infrastructure
+RDW,Industrials,Aerospace & Defense
+REAL,Consumer Cyclical,Luxury Goods
+RELX,Industrials,Specialty Business Services
+RDDT,Communication Services,Internet Content & Information
+RELY,Technology,Software - Infrastructure
+REYN,Consumer Cyclical,Packaging & Containers
+REZI,Industrials,Industrial Distribution
+RGLD,Basic Materials,Gold
+RGTI,Technology,Computer Hardware
+RIVN,Consumer Cyclical,Auto Manufacturers
+RKLB,Industrials,Aerospace & Defense
+RIO,Basic Materials,Other Industrial Metals & Mining
+RHI,Industrials,Staffing & Employment Services
+RMBS,Technology,Semiconductors
+RMD,Healthcare,Medical Instruments & Supplies
+RNG,Technology,Software - Application
+ROG,Technology,Electronic Components
+ROK,Industrials,Specialty Industrial Machinery
+ROKU,Communication Services,Entertainment
+ROP,Technology,Software - Application
+RPM,Basic Materials,Specialty Chemicals
+RPRX,Healthcare,Biotechnology
+RR,Industrials,Specialty Industrial Machinery
+RRX,Industrials,Specialty Industrial Machinery
+RSG,Industrials,Waste Management
+RTO,Industrials,Specialty Business Services
+RUM,Communication Services,Internet Content & Information
+RVLV,Consumer Cyclical,Internet Retail
+RUN,Technology,Solar
+RVMD,Healthcare,Biotechnology
+RTX,Industrials,Aerospace & Defense
+RVTY,Healthcare,Diagnostics & Research
+RXO,Industrials,Trucking
+RXRX,Healthcare,Biotechnology
+RZLV,Technology,Software - Infrastructure
+RYAAY,Industrials,Airlines
+S,Technology,Software - Infrastructure
+SAIA,Industrials,Trucking
+SAIL,Technology,Software - Infrastructure
+SA,Basic Materials,Gold
+SATL,Industrials,Aerospace & Defense
+SAP,Technology,Software - Application
+SANM,Technology,Electronic Components
+SBAC,Real Estate,REIT - Specialty
+SATS,Communication Services,Telecom Services
+SBH,Consumer Cyclical,Specialty Retail
+SBRA,Real Estate,REIT - Healthcare Facilities
+SBLK,Industrials,Marine Shipping
+SCCO,Basic Materials,Copper
+SCI,Consumer Cyclical,Personal Services
+SBSW,Basic Materials,Other Precious Metals & Mining
+SDGR,Healthcare,Health Information Services
+SE,Consumer Cyclical,Internet Retail
+SEDG,Technology,Solar
+SFL,Industrials,Marine Shipping
+SERV,Industrials,Specialty Industrial Machinery
+SHEL,Energy,Oil & Gas Integrated
+SFM,Consumer Defensive,Grocery Stores
+SHMD,Unknown,Unknown
+SGML,Basic Materials,Other Industrial Metals & Mining
+SIDU,Unknown,Unknown
+SIG,Unknown,Unknown
+SIFY,Unknown,Unknown
+SHLS,Unknown,Unknown
+SIMO,Unknown,Unknown
+SHW,Unknown,Unknown
+SITM,Unknown,Unknown
+SJM,Unknown,Unknown
+SHOP,Unknown,Unknown
+SKE,Unknown,Unknown
+SLB,Unknown,Unknown
+SLGN,Unknown,Unknown
+SKM,Unknown,Unknown
+SKYT,Unknown,Unknown
+SLAB,Unknown,Unknown
+SLDP,Unknown,Unknown
+SMCI,Unknown,Unknown
+SMG,Unknown,Unknown
+SLNH,Unknown,Unknown
+SMR,Unknown,Unknown
+SMTC,Unknown,Unknown
+SNOW,Unknown,Unknown
+SNPS,Unknown,Unknown
+SO,Unknown,Unknown
+SNX,Unknown,Unknown
+SNDR,Unknown,Unknown
+SNDK,Unknown,Unknown
+SNAP,Unknown,Unknown
+SOLS,Unknown,Unknown
+SONO,Unknown,Unknown
+SONY,Unknown,Unknown
+SON,Unknown,Unknown
+SOUN,Unknown,Unknown
+SQM,Unknown,Unknown
+SRAD,Unknown,Unknown
+SRE,Unknown,Unknown
+SRFM,Unknown,Unknown
+SSL,Unknown,Unknown
+SPOT,Unknown,Unknown
+SPIR,Unknown,Unknown
+SSNC,Unknown,Unknown
+SSRM,Unknown,Unknown
+SSYS,Unknown,Unknown
+ST,Unknown,Unknown
+STGW,Unknown,Unknown
+SPSC,Unknown,Unknown
+STM,Unknown,Unknown
+STNE,Unknown,Unknown
+STNG,Unknown,Unknown
+STLD,Unknown,Unknown
+STLA,Unknown,Unknown
+STRC,Unknown,Unknown
+STUB,Unknown,Unknown
+STZ,Unknown,Unknown
+STX,Unknown,Unknown
+SUNB,Unknown,Unknown
+SWK,Unknown,Unknown
+SUZ,Unknown,Unknown
+SWKS,Unknown,Unknown
+SW,Unknown,Unknown
+SVM,Unknown,Unknown
+SYM,Unknown,Unknown
+SYK,Unknown,Unknown
+SYY,Unknown,Unknown
+SXC,Unknown,Unknown
+SYNA,Unknown,Unknown
+TBLA,Unknown,Unknown
+T,Unknown,Unknown
+TAL,Unknown,Unknown
+TAP,Unknown,Unknown
+TE,Unknown,Unknown
+TEAM,Unknown,Unknown
+TDC,Unknown,Unknown
+TDS,Unknown,Unknown
+TCOM,Unknown,Unknown
+TECK,Unknown,Unknown
+TER,Unknown,Unknown
+TENB,Unknown,Unknown
+TEX,Unknown,Unknown
+TEM,Unknown,Unknown
+TEL,Unknown,Unknown
+TGT,Unknown,Unknown
+TH,Unknown,Unknown
+TIC,Unknown,Unknown
+TFPM,Unknown,Unknown
+TGB,Unknown,Unknown
+TIGO,Unknown,Unknown
+TKR,Unknown,Unknown
+TJX,Unknown,Unknown
+TKC,Unknown,Unknown
+TLK,Unknown,Unknown
+TMC,Unknown,Unknown
+TMUS,Unknown,Unknown
+TME,Unknown,Unknown
+TMHC,Unknown,Unknown
+TOL,Unknown,Unknown
+TREX,Unknown,Unknown
+TRI,Unknown,Unknown
+TPR,Unknown,Unknown
+TOST,Unknown,Unknown
+TRMB,Unknown,Unknown
+TRT,Unknown,Unknown
+TRMD,Unknown,Unknown
+TROX,Unknown,Unknown
+TRUP,Unknown,Unknown
+TSAT,Unknown,Unknown
+TSM,Unknown,Unknown
+TSEM,Unknown,Unknown
+TSLA,Unknown,Unknown
+TSN,Unknown,Unknown
+TTAN,Unknown,Unknown
+TTC,Unknown,Unknown
+TSSI,Unknown,Unknown
+TT,Unknown,Unknown
+TTD,Unknown,Unknown
+TTI,Unknown,Unknown
+TTE,Unknown,Unknown
+TTEK,Unknown,Unknown
+TTMI,Unknown,Unknown
+TTWO,Unknown,Unknown
+TU,Unknown,Unknown
+TXN,Unknown,Unknown
+TWLO,Unknown,Unknown
+TYL,Unknown,Unknown
+UAMY,Unknown,Unknown
+UBER,Unknown,Unknown
+UAL,Unknown,Unknown
+U,Unknown,Unknown
+UEC,Unknown,Unknown
+UL,Unknown,Unknown
+ULS,Unknown,Unknown
+UCTT,Unknown,Unknown
+UI,Unknown,Unknown
+ULTA,Unknown,Unknown
+UNIT,Unknown,Unknown
+UNH,Unknown,Unknown
+UMC,Unknown,Unknown
+UPBD,Unknown,Unknown
+URBN,Unknown,Unknown
+UPS,Unknown,Unknown
+UNP,Unknown,Unknown
+UPWK,Unknown,Unknown
+USAS,Unknown,Unknown
+URG,Unknown,Unknown
+USAR,Unknown,Unknown
+UROY,Unknown,Unknown
+USFD,Unknown,Unknown
+VC,Unknown,Unknown
+VECO,Unknown,Unknown
+USPH,Unknown,Unknown
+UUUU,Unknown,Unknown
+VALE,Unknown,Unknown
+VERX,Unknown,Unknown
+VIAV,Unknown,Unknown
+VICR,Unknown,Unknown
+VEEV,Unknown,Unknown
+VELO,Unknown,Unknown
+VLO,Unknown,Unknown
+VISN,Unknown,Unknown
+VIPS,Unknown,Unknown
+VIV,Unknown,Unknown
+VMC,Unknown,Unknown
+VLTO,Unknown,Unknown
+VOD,Unknown,Unknown
+VNT,Unknown,Unknown
+VNET,Unknown,Unknown
+VOYG,Unknown,Unknown
+VRRM,Unknown,Unknown
+VRNS,Unknown,Unknown
+VPG,Unknown,Unknown
+VRSN,Unknown,Unknown
+VRT,Unknown,Unknown
+VSCO,Unknown,Unknown
+VSAT,Unknown,Unknown
+VRTX,Unknown,Unknown
+VSH,Unknown,Unknown
+VTR,Unknown,Unknown
+VUZI,Unknown,Unknown
+VSTS,Unknown,Unknown
+VST,Unknown,Unknown
+VYX,Unknown,Unknown
+W,Unknown,Unknown
+WAB,Unknown,Unknown
+VZLA,Unknown,Unknown
+VZ,Unknown,Unknown
+WAT,Unknown,Unknown
+WDAY,Unknown,Unknown
+WB,Unknown,Unknown
+WCN,Unknown,Unknown
+WDC,Unknown,Unknown
+WLK,Unknown,Unknown
+WELL,Unknown,Unknown
+WK,Unknown,Unknown
+WERN,Unknown,Unknown
+WLTH,Unknown,Unknown
+WMS,Unknown,Unknown
+WOLF,Unknown,Unknown
+WMT,Unknown,Unknown
+WM,Unknown,Unknown
+WMB,Unknown,Unknown
+WRD,Unknown,Unknown
+WULF,Unknown,Unknown
+WSC,Unknown,Unknown
+WPM,Unknown,Unknown
+WOOF,Unknown,Unknown
+XMTR,Unknown,Unknown
+WYFI,Unknown,Unknown
+XENE,Unknown,Unknown
+XE,Unknown,Unknown
+XNDU,Unknown,Unknown
+XOM,Unknown,Unknown
+XXI,Unknown,Unknown
+XPO,Unknown,Unknown
+XPEV,Unknown,Unknown
+XYL,Unknown,Unknown
+YETI,Unknown,Unknown
+XYZ,Unknown,Unknown
+YELP,Unknown,Unknown
+YUMC,Unknown,Unknown
+Z,Unknown,Unknown
+YMM,Unknown,Unknown
+YOU,Unknown,Unknown
+YSS,Unknown,Unknown
+YSWY,Unknown,Unknown
+ZETA,Unknown,Unknown
+ZG,Unknown,Unknown
+ZD,Unknown,Unknown
+ZBRA,Unknown,Unknown
+ZIM,Unknown,Unknown
+ZTS,Unknown,Unknown
+ZWS,Unknown,Unknown
+ZM,Unknown,Unknown
+ZS,Unknown,Unknown
+ZTO,Unknown,Unknown

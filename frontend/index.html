@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Screener Dashboard</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+  <!-- Top bar -->
+  <div id="topbar">
+    <span id="topbar-title">Screener</span>
+    <span id="topbar-date">—</span>
+    <div id="view-toggle">
+      <button id="view-panel" class="view-btn active">Panel</button>
+      <button id="view-robots" class="view-btn">Robotlar</button>
+    </div>
+    <span id="topbar-counts">—</span>
+  </div>
+
+  <!-- Robots view (toggled from the top bar; hidden by default) -->
+  <div id="robots-view"></div>
+
+  <!-- Main layout: left sidebar + right content -->
+  <div id="layout">
+
+    <!-- Left: Sector list -->
+    <div id="sidebar">
+      <div class="panel-header">Sectors</div>
+      <input id="sector-search" type="text" placeholder="Sektör ara..." autocomplete="off">
+      <div id="sector-cats"></div>
+      <div id="sector-actions">
+        <button id="pin-all" title="Listedeki tüm sektörleri sabitle">Tümünü Seç</button>
+        <button id="clear-pins" title="Sabitlenenleri temizle">Tümünü Temizle</button>
+      </div>
+      <div id="sector-list"></div>
+    </div>
+
+    <!-- Right: stacked panels -->
+    <div id="main">
+
+      <!-- Active filters: removable chips showing exactly what's filtering the view -->
+      <div id="active-filters"></div>
+
+      <!-- Row 1: RRG chart (wide) + Aday Hisseler -->
+      <div id="row-top">
+        <div class="card" id="card-rrg">
+          <div class="card-header">Rotation (RRG)
+            <button id="rrg-fullscreen-btn" title="Tam Ekran">⛶</button>
+          </div>
+          <div class="card-body">
+            <canvas id="rrg-canvas"></canvas>
+          </div>
+        </div>
+
+        <div class="card" id="card-candidates">
+          <div class="card-header">Aday Hisseler</div>
+          <div class="card-body" id="candidates-body">
+            <div class="cand-split">
+              <div class="cand-col" id="cand-main">
+                <div class="cand-col-hdr">STRONG / WARMING <span class="cand-count" id="cand-main-count"></span></div>
+                <div class="cand-col-subhdr"><span>Ticker</span><span>Sector</span><span>Stage</span><span>Score</span></div>
+                <div class="cand-col-rows" id="cand-main-rows"></div>
+              </div>
+              <div class="cand-col" id="cand-guc">
+                <div class="cand-col-hdr cand-col-hdr-guc">GUCLENEN <span class="cand-count" id="cand-guc-count"></span></div>
+                <div class="cand-col-subhdr"><span>Ticker</span><span>Sector</span><span>Stage</span><span>Score</span></div>
+                <div class="cand-col-rows" id="cand-guc-rows"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 2: Stock explorer -->
+      <div class="card" id="card-stocks">
+        <div class="card-header">
+          Stocks <span id="stock-count" class="cand-count"></span>
+          <input id="stock-search" type="text" placeholder="Ticker veya sektör ara..." autocomplete="off">
+          <button id="filters-toggle">Filtreler</button>
+          <button id="csv-export">CSV</button>
+        </div>
+        <div id="stock-filters">
+          <div class="filt-row">
+            <span class="filt-lbl">Stage</span>
+            <div id="stage-chips" class="chip-row"></div>
+          </div>
+          <div class="filt-row filt-ranges">
+            <div class="rng"><span>MCap(B)</span>
+              <input type="number" data-rng="mcap" data-b="min" placeholder="min">
+              <input type="number" data-rng="mcap" data-b="max" placeholder="max"></div>
+            <div class="rng"><span>RSI</span>
+              <input type="number" data-rng="rsi" data-b="min" placeholder="min">
+              <input type="number" data-rng="rsi" data-b="max" placeholder="max"></div>
+            <div class="rng"><span>ATR%</span>
+              <input type="number" data-rng="atr" data-b="min" placeholder="min">
+              <input type="number" data-rng="atr" data-b="max" placeholder="max"></div>
+            <div class="rng"><span>Ext</span>
+              <input type="number" data-rng="ext" data-b="min" placeholder="min">
+              <input type="number" data-rng="ext" data-b="max" placeholder="max"></div>
+            <div class="rng"><span>RVOL</span>
+              <input type="number" data-rng="rvol" data-b="min" placeholder="min">
+              <input type="number" data-rng="rvol" data-b="max" placeholder="max"></div>
+            <div class="rng">
+              <select id="perf-field">
+                <option value="change_pct">Day%</option>
+                <option value="weekly">Week%</option>
+                <option value="monthly">Month%</option>
+                <option value="ytd">YTD%</option>
+              </select>
+              <input type="number" data-rng="perf" data-b="min" placeholder="min">
+              <input type="number" data-rng="perf" data-b="max" placeholder="max"></div>
+          </div>
+        </div>
+        <div class="card-body">
+          <table id="stock-table">
+            <thead>
+              <tr>
+                <th data-col="Ticker">Ticker</th>
+                <th data-col="Sector">Sector</th>
+                <th data-col="Stage">Stage</th>
+                <th data-col="Close">Close</th>
+                <th data-col="change_pct">Day%</th>
+                <th data-col="weekly">Week%</th>
+                <th data-col="monthly">Month%</th>
+                <th data-col="ytd">YTD%</th>
+                <th data-col="rsi">RSI</th>
+                <th data-col="rvol_avg">RVOL</th>
+                <th data-col="ext">Ext</th>
+                <th data-col="atr_pct">ATR%</th>
+                <th data-col="Vol_Confirmed">VC</th>
+              </tr>
+            </thead>
+            <tbody id="stock-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- RRG hover tooltip (fixed, pointer-events:none) -->
+  <div id="rrg-tooltip"></div>
+
+  <!-- Robot tearsheet modal -->
+  <div id="robot-modal">
+    <div id="robot-modal-card">
+      <div id="robot-modal-bar">
+        <span id="robot-modal-title">—</span>
+        <button id="robot-modal-close" title="Kapat">✕</button>
+      </div>
+      <div id="robot-modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Stock detail modal -->
+  <div id="stock-modal">
+    <div id="stock-modal-card">
+      <div id="stock-modal-bar">
+        <span id="stock-modal-title">—</span>
+        <button id="stock-modal-close" title="Kapat">✕</button>
+      </div>
+      <div id="stock-modal-body"></div>
+    </div>
+  </div>
+
+  <!-- RRG fullscreen overlay: wide canvas + inspector panel -->
+  <div id="rrg-modal">
+    <div id="rrg-modal-bar">
+      <span>Rotation (RRG) — Tam Ekran</span>
+      <button id="rrg-modal-close" title="Kapat">✕</button>
+    </div>
+    <div id="rrg-modal-body">
+      <div id="rrg-canvas-wrap">
+        <canvas id="rrg-canvas-full"></canvas>
+      </div>
+      <div id="rrg-panel"></div>
+    </div>
+  </div>
+
+  <script src="/static/data.js"></script>
+  <script src="/static/utils.js"></script>
+  <script src="/static/compute.js"></script>
+  <script src="/static/sectors.js"></script>
+  <script src="/static/rrg.js"></script>
+  <script src="/static/rrg_modal.js"></script>
+  <script src="/static/candidates.js"></script>
+  <script src="/static/table.js"></script>
+  <script src="/static/stock_modal.js"></script>
+  <script src="/static/robots.js"></script>
+  <script src="/static/robot_modal.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

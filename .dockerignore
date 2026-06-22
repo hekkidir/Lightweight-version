@@ -1,0 +1,17 @@
+.git
+.github
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+*.egg-info/
+.env
+
+# Tests aren't needed in the runtime image (CI runs them separately).
+tests/
+
+# Regenerated/large data — keep tickers.csv (needed for bootstrap), drop parquets.
+data/*.parquet

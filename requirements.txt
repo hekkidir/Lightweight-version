@@ -1,0 +1,6 @@
+# Install the exact, reproducible versions:
+#     pip install -r requirements.txt
+#
+# This delegates to the pinned lock so there is one source of pins. Abstract
+# dependency declarations (names + lower bounds) live in pyproject.toml.
+-r requirements.lock
