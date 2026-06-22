@@ -1,8 +1,5 @@
 # ── Generated / live-updating data (rebuilt by the pipeline every run) ──
 # tickers.csv is the hand-edited seed input and IS tracked (it's .csv, not parquet).
-data/*.parquet
-# robots.json is produced by the robots stage (or seeded) — runtime data, not source.
-data/robots.json
 .server.log
 
 # ── Python ──
