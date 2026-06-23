@@ -1,0 +1,14 @@
+services:
+  screener:
+    image: serdardursun/stock-analysis:latest
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - /opt/stock-analysis/data:/app/data
+    environment:
+      SCREENER_HOST: "0.0.0.0"
+      SCREENER_PORT: "8000"
+      SCREENER_DATA_DIR: "/app/data"
+      SCREENER_LOG_LEVEL: "INFO"
+      SCREENER_CORS_ORIGINS: "https://hekkidir.github.io"
