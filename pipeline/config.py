@@ -47,7 +47,9 @@ class StageConfig:
 
 @dataclass
 class DownloadConfig:
-    chunk_size: int
+    chunk_size:             int
+    backfill_lookback_days: int
+    backfill_min_frac:      float
 
 
 @dataclass
@@ -106,7 +108,9 @@ def load(path: Path = CONFIG_FILE) -> Config:
                                get("screener", "breadth_stages", str, "2A,2B").split(",")],
         ),
         download=DownloadConfig(
-            chunk_size = get("download", "chunk_size", int, 25),
+            chunk_size             = get("download", "chunk_size",             int,   25),
+            backfill_lookback_days = get("download", "backfill_lookback_days", int,   15),
+            backfill_min_frac      = get("download", "backfill_min_frac",      float, 0.97),
         ),
         rotation=RotationConfig(
             window_position      = get("rotation", "window_position",      int,    20),

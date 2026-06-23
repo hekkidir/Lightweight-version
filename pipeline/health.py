@@ -13,11 +13,31 @@ from pathlib import Path
 import pandas as pd
 
 from pipeline import schema
+from pipeline.config import cfg
 
 EXPECTED = [
     "prices.parquet", "metrics.parquet", "sectors.parquet",
     "rotation.parquet", "rotation_tail.parquet",
 ]
+
+
+def coverage_gaps(prices: pd.DataFrame, lookback: int, min_frac: float) -> list[tuple]:
+    """Recent trading days whose ticker coverage is below min_frac of the recent
+    median — the signature of a throttled/partial download (e.g. 345 of 1079
+    tickers). Settled bars only (a live-snapshot day is intentionally partial).
+    Pure: no I/O. Returns [(date, count, median), ...] sorted by date."""
+    if lookback <= 0 or prices.empty or "Date" not in prices.columns:
+        return []
+    df = prices
+    if "Is_Synthetic" in df.columns:
+        df = df[~df["Is_Synthetic"].fillna(False).astype(bool)]
+    counts = df.groupby("Date")["Ticker"].nunique().sort_index()
+    recent = counts.tail(lookback)
+    if len(recent) < 3:
+        return []
+    median = float(recent.median())
+    return [(d, int(c), int(median)) for d, c in recent.items()
+            if c < median * min_frac]
 
 
 def check(data_dir: Path) -> list[str]:
@@ -43,6 +63,20 @@ def check(data_dir: Path) -> list[str]:
         for col in schema.SCHEMAS.get(name, []):
             if col in df.columns and df[col].isna().all():
                 problems.append(f"{name}: required column '{col}' is entirely NaN")
+
+    # prices coverage: a recent day with far fewer tickers than the norm is a
+    # silent partial download — it force-exits held robots as 'data_missing' and
+    # corrupts indicators. Flag it (ASCII-only: run.py prints these to cp1252).
+    pp = data_dir / "prices.parquet"
+    if pp.exists():
+        try:
+            pr = pd.read_parquet(pp, columns=["Date", "Ticker", "Is_Synthetic"])
+        except (ValueError, KeyError):
+            pr = pd.read_parquet(pp, columns=["Date", "Ticker"])
+        for d, c, med in coverage_gaps(pr, cfg.download.backfill_lookback_days,
+                                       cfg.download.backfill_min_frac):
+            problems.append(f"prices: {d} has {c} tickers "
+                            f"(recent median {med}) -- partial download?")
 
     # metrics-specific: a broken classifier shows up as a degenerate distribution
     mp = data_dir / "metrics.parquet"

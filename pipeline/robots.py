@@ -108,6 +108,18 @@ def _load_prices(data_dir: Path) -> pd.DataFrame:
     return prices
 
 
+def _last_settled_date(prices: pd.DataFrame) -> pd.Timestamp:
+    """The most recent REAL settled bar — never a live/intraday snapshot.
+    download.py tags pre/regular-session snapshot bars with Is_Synthetic=True;
+    those carry the prior day's placeholder Volume, which would corrupt the
+    volume gates (RVOL, dollar-vol, A7/G5/G6 recipes). So the robots always
+    evaluate on the last NON-synthetic bar, not just the second-to-last row."""
+    dates = prices["Date"]
+    if "Is_Synthetic" in prices.columns:
+        dates = prices.loc[~prices["Is_Synthetic"].fillna(False).astype(bool), "Date"]
+    return pd.Timestamp(dates.max())
+
+
 def _robot_stages(g: pd.DataFrame, cfg: Config) -> pd.Series:
     """Exact port of backtest 02_compute_features.classify_stages (EMA-alignment +
     RSI/ext/slope), distinct from LW's regime-based classifier. Uses Wilder RSI +
@@ -198,16 +210,16 @@ def _ft_for_day(panel: pd.DataFrame, gp: pd.DataFrame, day) -> pd.DataFrame:
     return ft
 
 
-def build_today(cfg: Config, data_dir: Path, settled_offset: int = 1) -> pd.DataFrame:
-    """Feature frame for the last settled bar (settled_offset=1 skips the latest,
-    often-partial live-snapshot bar whose volume would corrupt the volume gates)."""
+def build_today(cfg: Config, data_dir: Path) -> pd.DataFrame:
+    """Feature frame for the last settled bar — the most recent non-synthetic bar
+    (see _last_settled_date; live-snapshot bars carry placeholder volume that
+    would corrupt the volume gates)."""
     prices = _load_prices(data_dir)
     gmap = pd.read_csv(data_dir / "gics_map.csv").set_index("Ticker")["GICS_Sector"].to_dict()
     spy = pd.read_parquet(data_dir / "spy.parquet")
     panel = compute_full_panel(prices, cfg, gmap)
     gp = gics_panel(prices, gmap, spy)
-    day = sorted(panel["Date"].unique())[-1 - settled_offset]
-    return _ft_for_day(panel, gp, day)
+    return _ft_for_day(panel, gp, _last_settled_date(prices))
 
 
 def _guclen_sectors(rot_df: pd.DataFrame, n: int = 12) -> set:
@@ -524,7 +536,7 @@ def build_robots(cfg: Config, data_dir: Path, lookback_days: int = 504) -> dict:
     panel = compute_full_panel(prices, cfg, gmap)
     gp = gics_panel(prices, gmap, spy)
     all_dates = sorted(panel["Date"].unique())
-    end = all_dates[-2]                                        # last settled bar
+    end = _last_settled_date(prices)                          # last non-synthetic bar
     sim_dates = [d for d in all_dates[252:] if d <= end][-lookback_days:]
     by_date = {d: g.set_index("Ticker") for d, g in panel.groupby("Date")}
     today_ft = _ft_for_day(panel, gp, end)

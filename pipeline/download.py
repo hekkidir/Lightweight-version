@@ -21,6 +21,7 @@ import yfinance as yf
 
 from pipeline import schema
 from pipeline.config import Config, runtime
+from pipeline.health import coverage_gaps
 
 # Suppress yfinance's direct-print "possibly delisted" and "N Failed downloads"
 # messages — false positives from rate-limiting, not real delistings.
@@ -202,16 +203,54 @@ def _one_pass(tickers, start, period, chunk_size, sleep_range):
                 miss_str = ", ".join(chunk_misses[:6]) + (
                     f" (+{len(chunk_misses) - 6})" if len(chunk_misses) > 6 else ""
                 )
-                print(f" ⚠️  no data: {miss_str}")
+                print(f" ! no data: {miss_str}")
             else:
                 print()  # clean newline
 
             if not chunk_df.empty:
                 parts.append(chunk_df)
         except Exception as e:
-            print(f" ❌ error: {str(e)[:80]}")
+            print(f" x error: {str(e)[:80]}")
         time.sleep(random.uniform(*sleep_range))
     return pd.concat(parts, ignore_index=True) if parts else pd.DataFrame()
+
+
+def _backfill_recent_gaps(combined: pd.DataFrame, all_tickers: list, cfg: Config,
+                          ticker_sector: dict, mcap: dict) -> tuple:
+    """Self-heal partial download days: re-fetch any recent trading day whose
+    ticker coverage is below par (see health.coverage_gaps) and add ONLY the
+    bars that are missing. Bounded to the recent window so it never re-chases
+    ancient gaps; one targeted fetch per run. Returns (combined, n_added)."""
+    gaps = coverage_gaps(combined, cfg.download.backfill_lookback_days,
+                         cfg.download.backfill_min_frac)
+    if not gaps:
+        return combined, 0
+    gap_days = {d for d, _c, _m in gaps}
+    earliest, median = min(gap_days), gaps[0][2]
+    present = {d: set(combined.loc[combined["Date"] == d, "Ticker"]) for d in gap_days}
+    universe = set(all_tickers)
+    missing = sorted({t for d in gap_days for t in (universe - present[d])})
+    worst = min(c for _d, c, _m in gaps)
+    print(f"[download] Coverage gap on {len(gap_days)} recent day(s) "
+          f"(worst {worst}/{median} tickers); backfilling {len(missing)} tickers "
+          f"from {earliest}...")
+    fetched = download_prices(missing, cfg, start=earliest)
+    if fetched.empty:
+        return combined, 0
+    fetched["Date"] = pd.to_datetime(fetched["Date"]).dt.date
+    fetched = fetched[fetched["Date"].isin(gap_days)]
+    exist_keys = set(zip(combined["Ticker"], combined["Date"]))
+    new = fetched[[k not in exist_keys
+                   for k in zip(fetched["Ticker"], fetched["Date"])]].copy()
+    if new.empty:
+        return combined, 0
+    new["Sector"]       = new["Ticker"].map(ticker_sector)
+    new["Market_Cap"]   = new["Ticker"].map(mcap)
+    new["Is_Synthetic"] = False
+    combined = pd.concat([combined, new], ignore_index=True)
+    print(f"[download] Backfilled {len(new)} missing bars "
+          f"({new['Ticker'].nunique()} tickers, {new['Date'].nunique()} days).")
+    return combined, len(new)
 
 
 def _missing(tickers, result):
@@ -240,7 +279,7 @@ def download_prices(tickers: list[str], cfg: Config,
     r3 = _one_pass(m2, start, period, 1, (2.0, 4.0))
     remaining = _missing(m2, r3)
     if remaining:
-        print(f"  Warning: {len(remaining)} tickers returned no data — cache rows preserved.")
+        print(f"  Warning: {len(remaining)} tickers returned no data - cache rows preserved.")
     return pd.concat([r1, r2, r3], ignore_index=True)
 
 
@@ -369,7 +408,7 @@ def run(cfg: Config, data_dir: Path) -> None:
         print(f"[download] US market active ({labels[market_session]}).")
 
     if synthetic_detected and fetch_start is not None:
-        print(f"[download] Synthetic bar for {last_date} detected — re-fetching as real bar.")
+        print(f"[download] Synthetic bar for {last_date} detected - re-fetching as real bar.")
 
     if skip_reason == 'cache current':
         print(f"[download] Prices up to date ({last_date}). Bar download skipped.")
@@ -378,7 +417,7 @@ def run(cfg: Config, data_dir: Path) -> None:
     parts = []
 
     if new_tickers:
-        print(f"[download] {len(new_tickers)} new tickers — fetching {hist_period} history...")
+        print(f"[download] {len(new_tickers)} new tickers - fetching {hist_period} history...")
         parts.append(download_prices(new_tickers, cfg, period=hist_period))
 
     if update_tickers and fetch_start is not None:
@@ -396,6 +435,10 @@ def run(cfg: Config, data_dir: Path) -> None:
     combined["Market_Cap"] = combined["Ticker"].map(mcap)
     combined = (combined[combined["Ticker"].isin(set(all_tickers))]
                 .reset_index(drop=True))
+
+    # Self-heal recent coverage gaps (throttled/partial download days) before the
+    # live snapshot, so downstream stages never see a half-empty trading day.
+    combined, _ = _backfill_recent_gaps(combined, all_tickers, cfg, ticker_sector, mcap)
 
     # ── Live snapshot (pre-market + regular hours only) ────────────────────────
     # Append or refresh a synthetic bar whose Close reflects the current intraday

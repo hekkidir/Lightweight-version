@@ -3,6 +3,39 @@
 All notable changes to this project are recorded here.
 Format follows [Keep a Changelog](https://keepachangelog.com/); versions use [SemVer](https://semver.org/).
 
+## [0.10.2] — 2026-06-24
+
+### Fixed
+- **Non-ASCII in `download.py` `print()` statements crashed downloads on the
+  Windows cp1252 console.** The `⚠️`/`❌`/`—` characters in the miss/error/status
+  prints raised `UnicodeEncodeError` — and the miss warning fires *exactly* on
+  throttled days with missing tickers, aborting the 3-pass recovery on the days
+  it exists to handle. Swapped for ASCII, per the repo's own print() convention.
+
+### Added
+- **Self-healing coverage backfill.** After the incremental fetch, `download.run`
+  re-downloads any of the last `backfill_lookback_days` trading days whose ticker
+  coverage drops below `backfill_min_frac` of the recent median (a throttled/
+  partial day, e.g. 345 of 1079 tickers), adding only the missing bars. Scoped to
+  the recent window so it never re-chases ancient, permanently-missing bars;
+  detection is a cheap groupby and only fetches when a gap is found. New config
+  knobs in `[download]`; disable with `backfill_lookback_days = 0`.
+- **Coverage check in `health.py`** (`coverage_gaps`, reused by the backfill):
+  `run.py check` now flags a recent day with anomalously low ticker coverage
+  instead of passing silently on a partial download.
+
+## [0.10.1] — 2026-06-23
+
+### Fixed
+- **Robots evaluated on the wrong bar after an end-of-day download.** `build_today`
+  and `build_robots` skipped the last bar positionally (`all_dates[-2]` /
+  `settled_offset=1`), assuming it was always a partial live snapshot. After a
+  proper post-close download the latest bar is real and full-volume, so this
+  over-skipped it — and across a market holiday (e.g. Juneteenth) the sim could
+  land two trading days early and miss a Monday rebalance entirely. Now both read
+  the `Is_Synthetic` flag that `download.py` already writes and evaluate on the
+  last genuinely settled (non-synthetic) bar via `_last_settled_date`.
+
 ## [0.10.0] — 2026-06-22
 
 Robots Phase 2 — the native standalone engine ships. The Robots tab now shows
