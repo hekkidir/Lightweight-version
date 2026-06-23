@@ -55,6 +55,11 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /opt/stock-analysis
+            mkdir -p data
             docker pull serdardursun/stock-analysis:latest
             docker compose up -d --remove-orphans
             docker image prune -f
+
+            # Install/update the pipeline cron job (runs Mon-Fri at 21:00 UTC = 4 PM ET)
+            CRON_JOB="0 21 * * 1-5 cd /opt/stock-analysis && docker compose exec -T screener python run.py pipeline >> /var/log/screener-pipeline.log 2>&1"
+            (crontab -l 2>/dev/null | grep -v "screener pipeline"; echo "$CRON_JOB") | crontab -
