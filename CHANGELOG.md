@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to this project are recorded here.
+All notable changes to this project are recorded here
 Format follows [Keep a Changelog](https://keepachangelog.com/); versions use [SemVer](https://semver.org/).
 
 ## [0.10.2] — 2026-06-24
