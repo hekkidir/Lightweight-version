@@ -21,7 +21,6 @@ import pandas as pd
 from fastapi import APIRouter, Depends, FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
-from fastapi.staticfiles import StaticFiles
 
 from pipeline import health, indicators
 from pipeline.config import load, runtime
@@ -48,17 +47,6 @@ def create_app(data_dir: Path) -> FastAPI:
     if runtime.cors_origins:
         app.add_middleware(CORSMiddleware, allow_origins=runtime.cors_origins,
                            allow_methods=["GET"], allow_headers=["*"])
-
-    # Always revalidate static assets so a changed JS/CSS file is never served
-    # from a stale browser cache (it still 304s when unchanged — cheap).
-    @app.middleware("http")
-    async def _no_stale_static(request, call_next):
-        resp = await call_next(request)
-        if request.url.path.startswith("/static"):
-            resp.headers["Cache-Control"] = "no-cache"
-        return resp
-
-    app.mount("/static", StaticFiles(directory=str(frontend)), name="static")
 
     # ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -170,4 +158,20 @@ def create_app(data_dir: Path) -> FastAPI:
 
     app.include_router(api, prefix="/api")
     app.include_router(api, prefix="/api/v1")
+
+    # Catch-all: serve any remaining path from the frontend directory.
+    # Registered last so all /api/* routes above take priority. Covers JS/CSS at
+    # root and the pre-built JSON under frontend/data/. no-cache so a changed
+    # asset is always revalidated (still 304s when unchanged — cheap).
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def _serve_static(full_path: str):
+        target = (frontend / full_path).resolve()
+        try:
+            target.relative_to(frontend.resolve())
+        except ValueError:
+            raise HTTPException(403)
+        if target.is_file():
+            return FileResponse(str(target), headers={"Cache-Control": "no-cache"})
+        raise HTTPException(404)
+
     return app

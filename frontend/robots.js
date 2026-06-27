@@ -82,9 +82,10 @@ function _candidatesTable(cands, byTicker) {
       <td class="rb-why" title="${escAttr(c.reason || "")}">${escHTML(c.reason || "")}</td>
     </tr>`;
   }).join("");
-  return `<table class="rb-table">
+  // Capped to ~5 rows; the rest scroll within the panel (header stays pinned).
+  return `<div class="rb-scroll"><table class="rb-table">
     <thead><tr><th>Hisse</th><th>Sektör</th><th>Stage</th><th>Skor</th><th>Neden</th></tr></thead>
-    <tbody>${rows}</tbody></table>`;
+    <tbody>${rows}</tbody></table></div>`;
 }
 
 function _robotCard(r, byTicker) {

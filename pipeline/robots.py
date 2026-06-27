@@ -42,19 +42,34 @@ A2_GICS_WEIGHTS = {"Technology": 1.4, "Financial Services": 0.7,
 B_SECTOR_WEIGHTS = {"Technology": 1.4, "Healthcare": 1.4,
                     "Financial Services": 0.7, "Energy": 0.8}
 SECTOR_TILT = {"A": A2_GICS_WEIGHTS, "AV": A2_GICS_WEIGHTS,
-               "B": B_SECTOR_WEIGHTS, "D": B_SECTOR_WEIGHTS}
-EXCLUDE_SECTORS = {"B": {"Financial Services"}, "D": {"Financial Services"}}
-SKIP_TRIM = {"A", "AV"}        # SA-DEF: let winners run (no weekly trim back to target)
+               "B": B_SECTOR_WEIGHTS, "D": B_SECTOR_WEIGHTS,
+               "A-G-W3": A2_GICS_WEIGHTS, "A-SCORE-CLUST": A2_GICS_WEIGHTS,
+               "B-GATE-W3": B_SECTOR_WEIGHTS}
+EXCLUDE_SECTORS = {"B": {"Financial Services"}, "D": {"Financial Services"},
+                   "B-GATE-W3": {"Financial Services"}}
+SKIP_TRIM = {"A", "AV", "A-G-W3", "A-SCORE-CLUST"}   # SA family: let winners run
 VSCREEN_REPLACE = {"D"}        # G5 replaces the H4 momentum gate (vs AND-gating it)
+
+# Per-key overrides for experimental variants. Keys absent here use the default.
+VC_COL      = {"A-G-W3": "vc_w3", "B-GATE-W3": "vc_w3"}   # vol-gate column
+SCORE_EXTRA = {                                               # additive score term
+    "A-SCORE-CLUST": lambda sub: 0.5 * _z(sub["vol_cluster_10"].fillna(0)),
+}
+# Robots that fill at next-day OPEN (T+1) instead of the global default. The 3
+# experimental variants reproduce the backtest, which decides on the close and
+# fills the following open.
+NEXT_OPEN_KEYS = {"A-G-W3", "A-SCORE-CLUST", "B-GATE-W3"}
 
 # Exact backtest configs (strategies.py): key, name, gate kind, D_n, volume screen,
 # sizing (C-axis), exit string. All weekly-rebalanced.
 ROBOTS = [
-    ("A",  "Strategy A — SA-DEF",          "sa", 5, None, "C2",  "E1+E51+E56"),
-    ("B",  "Strategy B — SB-B",            "sb", 3, None, "C8a", "E1+E24+E33"),
-    ("C",  "Volume C — SV-A7 +10% floor",  "sv", 5, "A7", "C8a", "E1+E24+E33+E20"),
-    ("D",  "Volume D — SB-HYB-G5-replace", "sb", 6, "G5", "C8a", "E1+E24+E33"),
-    ("AV", "AV — SA-HYB-G6",               "sa", 5, "G6", "C2",  "E1+E51+E56"),
+    ("A",             "Strategy A — SA-DEF",                      "sa", 5, None, "C2",  "E1+E51+E56"),
+    ("A-G-W3",        "A-G-W3 — SA-DEF, 3-day vol gate",         "sa", 5, None, "C2",  "E1+E51+E56"),
+    ("A-SCORE-CLUST", "A-SCORE-CLUST — SA-DEF, cluster score",   "sa", 5, None, "C2",  "E1+E51+E56"),
+    ("B-GATE-W3",     "Strategy B — B-GATE-W3",                   "sb", 3, None, "C8a", "E1+E24+E33+EVP"),
+    ("C",             "Volume C — SV-A7 +10% floor",              "sv", 5, "A7", "C8a", "E1+E24+E33+E20"),
+    ("D",             "Volume D — SB-HYB-G5-replace",             "sb", 6, "G5", "C8a", "E1+E24+E33"),
+    ("AV",            "AV — SA-HYB-G6",                           "sa", 5, "G6", "C2",  "E1+E51+E56"),
 ]
 
 
@@ -73,10 +88,10 @@ def _size(cands: pd.DataFrame, variant: str) -> pd.Series:
 def _should_exit(pos: dict, row: pd.Series, exit_str: str) -> tuple[bool, str]:
     """Faithful port of backtest engine.should_exit for the codes the robots use:
     E1 stage-flip, E20 −10% floor, E24 3·ATR floor, E33 4·ATR trail after +20%,
-    E51 −7% floor, E56 EMA20-lock after +10%."""
+    E51 −7% floor, E56 EMA20-lock after +10%, EVP value-area-low break (needs vp_val)."""
     px = row.get("Close", np.nan)
     if pd.isna(px):
-        return True, "data_missing"
+        return False, ""   # hold through a NaN bar (backtest keeps the row, notna-guarded)
     toks = set(exit_str.split("+"))
     entry, hwm = pos["entry_price"], pos["hwm"]
     gain = (px / entry - 1) if entry else 0.0
@@ -94,6 +109,10 @@ def _should_exit(pos: dict, row: pd.Series, exit_str: str) -> tuple[bool, str]:
         return True, "floor_7pct"
     if "E56" in toks and peak >= 0.10 and pd.notna(ema20) and px < ema20:
         return True, "ema20_lock"
+    if "EVP" in toks:
+        vval = row.get("vp_val", np.nan)
+        if pd.notna(vval) and px < vval:
+            return True, "vp_below_val"
     return False, ""
 
 
@@ -265,9 +284,9 @@ def _shared(ft: pd.DataFrame) -> pd.Series:
 
 # ── Gates & recipes ───────────────────────────────────────────────────────────
 
-def _healthy_2c(ft, require_vc=True):
+def _healthy_2c(ft, require_vc=True, vc_col="vol_confirmed"):
     m = (ft["stage"] == "2C") & (ft["Close"] > ft["ema10"]) & (ft["ext"] < 9) & ft["prev_stage"].isin(["2B", "2C"])
-    return (m & ft["vol_confirmed"]) if require_vc else m
+    return (m & ft[vc_col]) if require_vc else m
 
 
 def _a4_gate(ft):
@@ -276,10 +295,10 @@ def _a4_gate(ft):
     return stage_ok & sec_ok
 
 
-def _sw_gate(ft):
+def _sw_gate(ft, vc_col="vol_confirmed"):
     # engine.select_quant's _stage_sector_mask with univ='SW' (the base robots'
     # default): STRONG/WARMING only — NO güçlenen (that's the live-display A4 gate).
-    stage_ok = ft["stage"].isin(["2A", "2B"]) | _healthy_2c(ft)
+    stage_ok = ft["stage"].isin(["2A", "2B"]) | _healthy_2c(ft, vc_col=vc_col)
     return stage_ok & ft["gics_quadrant"].isin(["STRONG", "WARMING"])
 
 
@@ -302,6 +321,8 @@ def _recipe_mask(rid, ft):
 # old display logic: SB applies a HARD H4 momentum gate (all 3 ret-ranks ≥0.9)
 # unless a volume recipe replaces it; sector tilts + Financial-Services exclusion.
 def _candidates_for(key, kind, vscreen, ft, n=15):
+    vc = VC_COL.get(key, "vol_confirmed")
+
     if kind == "sv":                                       # C — pure volume recipe
         mask = _q_gate(ft) & _recipe_mask(vscreen, ft).fillna(False)
         sub = ft[mask].copy()
@@ -312,13 +333,15 @@ def _candidates_for(key, kind, vscreen, ft, n=15):
         return sub.nlargest(n, "score")
 
     if kind == "sa":                                       # A, AV — multi-factor
-        mask = _sw_gate(ft) & ft["vol_confirmed"] & (ft["dollar_vol"] >= LIQ_MIN_DV) & ft["atr_pct"].between(2, 12)
+        mask = _sw_gate(ft, vc_col=vc) & ft[vc] & (ft["dollar_vol"] >= LIQ_MIN_DV) & ft["atr_pct"].between(2, 12)
         if vscreen:
             mask = mask & _recipe_mask(vscreen, ft).fillna(False)
         sub = ft[mask].copy()
         if sub.empty:
             return sub
         sub["score"] = _multifactor(sub)
+        if key in SCORE_EXTRA:
+            sub["score"] = sub["score"] + SCORE_EXTRA[key](sub)
         tilt = SECTOR_TILT.get(key)
         if tilt:
             sub["score"] = sub["score"] * sub["GICS"].map(tilt).fillna(1.0)
@@ -326,7 +349,7 @@ def _candidates_for(key, kind, vscreen, ft, n=15):
         return sub.nlargest(n, "score")
 
     # sb (B, D) — dashboard score, hard H4 gate (unless a recipe replaces it)
-    mask = _sw_gate(ft) & ft["vol_confirmed"]
+    mask = _sw_gate(ft, vc_col=vc) & ft[vc]
     if key not in VSCREEN_REPLACE:
         mask = mask & (ft["ret_1m_rank"] >= 0.9) & (ft["ret_3m_rank"] >= 0.9) & (ft["ret_6m_rank"] >= 0.9)
     if vscreen:
@@ -365,9 +388,19 @@ def _close_trade(trades, t, p, exit_date, exit_px, reason):
                    "entry_candidates": p["entry_cands"]})
 
 
-def _mtm(cash, positions, closes):
-    return cash + sum(p["shares"] * closes.get(t, np.nan) for t, p in positions.items()
-                      if pd.notna(closes.get(t, np.nan)))
+def _mtm(cash, positions, closes, last_px=None):
+    """Mark-to-market. A held position whose ticker has no bar today is valued at
+    its last-known close (then entry price) instead of vanishing — mirrors the
+    backtest, which keeps no-data days as NaN rows and holds the position through."""
+    tot = cash
+    for t, p in positions.items():
+        px = closes.get(t, np.nan)
+        if pd.isna(px) and last_px is not None:
+            px = last_px.get(t, np.nan)
+        if pd.isna(px):
+            px = p["entry_price"]
+        tot += p["shares"] * px
+    return tot
 
 
 def _simulate(rcfg, by_date, panel, gp, dates) -> dict:
@@ -376,11 +409,13 @@ def _simulate(rcfg, by_date, panel, gp, dates) -> dict:
     Phase-A trim (skipped for let-winners-run) + Phase-B cash-capped buys."""
     key, name, kind, d_n, vscreen, sizing, exit_str = rcfg
     skip_trim = key in SKIP_TRIM
+    next_open = NEXT_OPEN_FILL or key in NEXT_OPEN_KEYS   # per-robot T+1 fill
     cash, positions, equity, trades, rebal = 1.0, {}, [], [], None
     last_closes = pd.Series(dtype=float)
+    last_px: dict = {}        # ticker -> last known close, for holding through data gaps
 
     def _fill(t, ndf, closes, fallback):
-        if NEXT_OPEN_FILL and ndf is not None and t in ndf.index:
+        if next_open and ndf is not None and t in ndf.index:
             px = ndf.loc[t, "Open"]
             if pd.notna(px):
                 return px
@@ -394,23 +429,27 @@ def _simulate(rcfg, by_date, panel, gp, dates) -> dict:
         last_closes = closes
         nd = dates[i + 1] if i + 1 < len(dates) else None
         ndf = by_date.get(nd) if nd is not None else None
-        fdate = nd if (NEXT_OPEN_FILL and nd is not None) else d
+        fdate = nd if (next_open and nd is not None) else d
 
         # 1. Exits: decide on today's close, execute at next-day open (T+1).
+        # A held ticker absent today is HELD THROUGH the gap (frozen at last close),
+        # not force-exited — matches the backtest, whose panel keeps no-data days as
+        # NaN rows so the position stays in the index and rides the gap out.
         to_exit = []
         for t, p in positions.items():
             if t not in ftd.index:
-                to_exit.append((t, "data_missing"))
                 continue
             row = ftd.loc[t]
             px = row.get("Close", np.nan)
-            if pd.notna(px) and px > p["hwm"]:
-                p["hwm"] = px
+            if pd.notna(px):
+                last_px[t] = float(px)
+                if px > p["hwm"]:
+                    p["hwm"] = px
             ex, reason = _should_exit(p, row, exit_str)
             if ex:
                 to_exit.append((t, reason))
         for t, reason in to_exit:
-            fp = _fill(t, ndf, closes, positions[t]["entry_price"])
+            fp = _fill(t, ndf, closes, last_px.get(t, positions[t]["entry_price"]))
             cash += positions[t]["shares"] * fp * (1 - COST_PER_SIDE)
             _close_trade(trades, t, positions[t], fdate, fp, reason)
             del positions[t]
@@ -421,7 +460,7 @@ def _simulate(rcfg, by_date, panel, gp, dates) -> dict:
             cands = _candidates_for(key, kind, vscreen, ft, n=d_n)
             if len(cands):
                 weights = _size(cands, sizing)
-                cur_eq = _mtm(cash, positions, closes)
+                cur_eq = _mtm(cash, positions, closes, last_px)
                 target = {t: float(weights.get(t, 0)) * cur_eq for t in cands.index}
                 tset = set(target)
                 cand_list = [{"ticker": tt, "score": round(float(cands.loc[tt, "score"]), 2)}
@@ -476,20 +515,26 @@ def _simulate(rcfg, by_date, panel, gp, dates) -> dict:
                 rebal = {"date": d.strftime("%Y-%m-%d"), "added": added, "dropped": dropped}
 
         # 3. Mark to market at today's close.
-        equity.append({"date": d.strftime("%Y-%m-%d"), "value": round(_mtm(cash, positions, closes), 6)})
+        equity.append({"date": d.strftime("%Y-%m-%d"),
+                       "value": round(_mtm(cash, positions, closes, last_px), 6)})
 
-    return _finalize(rcfg, positions, trades, equity, rebal, dates[-1], last_closes)
+    return _finalize(rcfg, positions, trades, equity, rebal, dates[-1], last_closes, last_px)
 
 
-def _finalize(rcfg, positions, trades, equity, rebal, last_date, last_closes) -> dict:
+def _finalize(rcfg, positions, trades, equity, rebal, last_date, last_closes, last_px=None) -> dict:
     key, name = rcfg[0], rcfg[1]
+    last_px = last_px or {}
     e0 = equity[0]["value"] if equity else 1.0
     eq = [{"date": e["date"], "value": round(e["value"] / e0 * 100, 2)} for e in equity]
 
-    final_val = sum(p["shares"] * last_closes.get(t, p["entry_price"]) for t, p in positions.items()) or 1.0
+    def _last(t, p):
+        v = last_px.get(t, last_closes.get(t, np.nan))
+        return v if pd.notna(v) else p["entry_price"]
+
+    final_val = sum(p["shares"] * _last(t, p) for t, p in positions.items()) or 1.0
     holdings = []
     for t, p in positions.items():
-        px = last_closes.get(t, p["entry_price"])
+        px = _last(t, p)
         holdings.append({"ticker": t, "weight": round(p["shares"] * px / final_val, 2),
                          "entry_date": p["entry_date"].strftime("%Y-%m-%d"),
                          "return_pct": round((px / p["entry_price"] - 1) * 100, 1),
@@ -538,6 +583,10 @@ def build_robots(cfg: Config, data_dir: Path, lookback_days: int = 504) -> dict:
     all_dates = sorted(panel["Date"].unique())
     end = _last_settled_date(prices)                          # last non-synthetic bar
     sim_dates = [d for d in all_dates[252:] if d <= end][-lookback_days:]
+    # Volume-profile value-area-low for the vp exit (EVP) — only needed over the sim
+    # window; robots whose exit_str lacks EVP ignore the column, so they're unaffected.
+    if sim_dates and any("EVP" in r[6] for r in ROBOTS):
+        panel = indicators.add_vp_val(panel, since=sim_dates[0])
     by_date = {d: g.set_index("Ticker") for d, g in panel.groupby("Date")}
     today_ft = _ft_for_day(panel, gp, end)
 
@@ -559,7 +608,7 @@ def run(cfg: Config, data_dir: Path) -> None:
     if not (data_dir / "gics_map.csv").exists() or not (data_dir / "spy.parquet").exists():
         print("[robots] gics_map.csv or spy.parquet missing — skipping (no robots.json).")
         return
-    print("[robots] Simulating 5 robots (this is the slow stage)...")
+    print(f"[robots] Simulating {len(ROBOTS)} robots (this is the slow stage)...")
     payload = build_robots(cfg, data_dir, lookback_days=2000)
     (data_dir / "robots.json").write_text(json.dumps(payload), encoding="utf-8")
     n_h = sum(len(r["holdings"]) for r in payload["robots"])

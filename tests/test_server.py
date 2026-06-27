@@ -95,7 +95,8 @@ def test_v1_alias_works(client):
 
 
 def test_static_is_revalidated(client):
-    # no-cache prevents stale JS being served after a frontend change
-    r = client.get("/static/app.js")
+    # no-cache prevents stale JS being served after a frontend change.
+    # Frontend assets are served from root (matching GitHub Pages), not /static.
+    r = client.get("/app.js")
     assert r.status_code == 200
     assert "no-cache" in r.headers.get("cache-control", "")

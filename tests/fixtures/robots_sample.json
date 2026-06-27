@@ -417,420 +417,6 @@
       }
     },
     {
-      "name": "Strategy B - SB-B",
-      "key": "B",
-      "inception": "2026-04-03",
-      "stats": {
-        "return_pct": 7.7,
-        "cagr": 13.4,
-        "max_dd": -11,
-        "win_rate": 55,
-        "sharpe": 1.3,
-        "n_trades": 10,
-        "exposure": 0.75
-      },
-      "equity": [
-        {
-          "date": "2026-04-03",
-          "value": 100.0
-        },
-        {
-          "date": "2026-04-17",
-          "value": 102.37
-        },
-        {
-          "date": "2026-05-01",
-          "value": 104.23
-        },
-        {
-          "date": "2026-05-15",
-          "value": 105.16
-        },
-        {
-          "date": "2026-05-29",
-          "value": 105.32
-        },
-        {
-          "date": "2026-06-05",
-          "value": 105.38
-        },
-        {
-          "date": "2026-06-12",
-          "value": 106.05
-        },
-        {
-          "date": "2026-06-17",
-          "value": 107.72
-        }
-      ],
-      "benchmarks": {
-        "sp500": [
-          {
-            "date": "2026-04-03",
-            "value": 100.0
-          },
-          {
-            "date": "2026-04-17",
-            "value": 101.0
-          },
-          {
-            "date": "2026-05-01",
-            "value": 101.85
-          },
-          {
-            "date": "2026-05-15",
-            "value": 102.27
-          },
-          {
-            "date": "2026-05-29",
-            "value": 102.25
-          },
-          {
-            "date": "2026-06-05",
-            "value": 102.05
-          },
-          {
-            "date": "2026-06-12",
-            "value": 102.03
-          },
-          {
-            "date": "2026-06-17",
-            "value": 102.46
-          }
-        ],
-        "ndx": [
-          {
-            "date": "2026-04-03",
-            "value": 100.0
-          },
-          {
-            "date": "2026-04-17",
-            "value": 99.99
-          },
-          {
-            "date": "2026-05-01",
-            "value": 99.59
-          },
-          {
-            "date": "2026-05-15",
-            "value": 99.42
-          },
-          {
-            "date": "2026-05-29",
-            "value": 99.94
-          },
-          {
-            "date": "2026-06-05",
-            "value": 101.19
-          },
-          {
-            "date": "2026-06-12",
-            "value": 102.81
-          },
-          {
-            "date": "2026-06-17",
-            "value": 104.18
-          }
-        ]
-      },
-      "holdings": [
-        {
-          "ticker": "HLTA",
-          "weight": 0.33,
-          "entry_date": "2026-04-17",
-          "return_pct": 7.5,
-          "days_held": 61
-        },
-        {
-          "ticker": "INDA",
-          "weight": 0.33,
-          "entry_date": "2026-04-17",
-          "return_pct": 5.5,
-          "days_held": 54
-        },
-        {
-          "ticker": "NRGA",
-          "weight": 0.33,
-          "entry_date": "2026-04-17",
-          "return_pct": 3.5,
-          "days_held": 47
-        }
-      ],
-      "candidates": [
-        {
-          "ticker": "RTLA",
-          "score": 2.7,
-          "reason": "H4 momentum 3/3 + vol"
-        },
-        {
-          "ticker": "SOFA",
-          "score": 2.5,
-          "reason": "H4 momentum 3/3 + vol"
-        },
-        {
-          "ticker": "BNKB",
-          "score": 2.3,
-          "reason": "H4 momentum 3/3 + vol"
-        },
-        {
-          "ticker": "HLTB",
-          "score": 2.1,
-          "reason": "H4 momentum 3/3 + vol"
-        },
-        {
-          "ticker": "INDB",
-          "score": 1.9,
-          "reason": "H4 momentum 3/3 + vol"
-        },
-        {
-          "ticker": "NRGB",
-          "score": 1.7,
-          "reason": "H4 momentum 3/3 + vol"
-        },
-        {
-          "ticker": "RTLB",
-          "score": 1.5,
-          "reason": "H4 momentum 3/3 + vol"
-        },
-        {
-          "ticker": "SOFB",
-          "score": 1.3,
-          "reason": "H4 momentum 3/3 + vol"
-        }
-      ],
-      "trades": [
-        {
-          "ticker": "INDA",
-          "entry_date": "2025-05-15",
-          "exit_date": "2025-06-22",
-          "return_pct": 15,
-          "days_held": 38,
-          "exit_reason": "stage-flip 2C->3A",
-          "entry_candidates": [
-            {
-              "ticker": "NRGA",
-              "score": 2.5
-            },
-            {
-              "ticker": "RTLA",
-              "score": 2.2
-            },
-            {
-              "ticker": "SOFA",
-              "score": 1.9
-            }
-          ]
-        },
-        {
-          "ticker": "RTLA",
-          "entry_date": "2025-07-01",
-          "exit_date": "2025-08-14",
-          "return_pct": 12,
-          "days_held": 44,
-          "exit_reason": "7% floor",
-          "entry_candidates": [
-            {
-              "ticker": "SOFA",
-              "score": 2.5
-            },
-            {
-              "ticker": "BNKB",
-              "score": 2.2
-            },
-            {
-              "ticker": "HLTB",
-              "score": 1.9
-            }
-          ]
-        },
-        {
-          "ticker": "BNKB",
-          "entry_date": "2025-09-10",
-          "exit_date": "2025-10-30",
-          "return_pct": 3,
-          "days_held": 50,
-          "exit_reason": "EMA20-lock +10%",
-          "entry_candidates": [
-            {
-              "ticker": "HLTB",
-              "score": 2.5
-            },
-            {
-              "ticker": "INDB",
-              "score": 2.2
-            },
-            {
-              "ticker": "NRGB",
-              "score": 1.9
-            }
-          ]
-        },
-        {
-          "ticker": "INDB",
-          "entry_date": "2025-11-05",
-          "exit_date": "2025-12-31",
-          "return_pct": 6,
-          "days_held": 56,
-          "exit_reason": "stage-flip 2B->1B",
-          "entry_candidates": [
-            {
-              "ticker": "NRGB",
-              "score": 2.5
-            },
-            {
-              "ticker": "RTLB",
-              "score": 2.2
-            },
-            {
-              "ticker": "SOFB",
-              "score": 1.9
-            }
-          ]
-        },
-        {
-          "ticker": "RTLB",
-          "entry_date": "2026-01-12",
-          "exit_date": "2026-03-15",
-          "return_pct": 3,
-          "days_held": 62,
-          "exit_reason": "floor stop",
-          "entry_candidates": [
-            {
-              "ticker": "SOFB",
-              "score": 2.5
-            },
-            {
-              "ticker": "BNKA",
-              "score": 2.2
-            },
-            {
-              "ticker": "HLTA",
-              "score": 1.9
-            }
-          ]
-        },
-        {
-          "ticker": "BNKA",
-          "entry_date": "2026-02-20",
-          "exit_date": "2026-04-29",
-          "return_pct": -6,
-          "days_held": 68,
-          "exit_reason": "trailing exit",
-          "entry_candidates": [
-            {
-              "ticker": "HLTA",
-              "score": 2.5
-            },
-            {
-              "ticker": "INDA",
-              "score": 2.2
-            },
-            {
-              "ticker": "NRGA",
-              "score": 1.9
-            }
-          ]
-        },
-        {
-          "ticker": "INDA",
-          "entry_date": "2026-03-25",
-          "exit_date": "2026-06-07",
-          "return_pct": -3,
-          "days_held": 74,
-          "exit_reason": "stage-flip 2C->3A",
-          "entry_candidates": [
-            {
-              "ticker": "NRGA",
-              "score": 2.5
-            },
-            {
-              "ticker": "RTLA",
-              "score": 2.2
-            },
-            {
-              "ticker": "SOFA",
-              "score": 1.9
-            }
-          ]
-        },
-        {
-          "ticker": "HLTA",
-          "entry_date": "2026-04-17",
-          "exit_date": null,
-          "return_pct": 7.5,
-          "days_held": 61,
-          "exit_reason": "",
-          "entry_candidates": [
-            {
-              "ticker": "NRGA",
-              "score": 2.4
-            },
-            {
-              "ticker": "RTLA",
-              "score": 2.1
-            },
-            {
-              "ticker": "SOFA",
-              "score": 1.8
-            }
-          ]
-        },
-        {
-          "ticker": "INDA",
-          "entry_date": "2026-04-17",
-          "exit_date": null,
-          "return_pct": 5.5,
-          "days_held": 54,
-          "exit_reason": "",
-          "entry_candidates": [
-            {
-              "ticker": "NRGA",
-              "score": 2.4
-            },
-            {
-              "ticker": "RTLA",
-              "score": 2.1
-            },
-            {
-              "ticker": "SOFA",
-              "score": 1.8
-            }
-          ]
-        },
-        {
-          "ticker": "NRGA",
-          "entry_date": "2026-04-17",
-          "exit_date": null,
-          "return_pct": 3.5,
-          "days_held": 47,
-          "exit_reason": "",
-          "entry_candidates": [
-            {
-              "ticker": "NRGA",
-              "score": 2.4
-            },
-            {
-              "ticker": "RTLA",
-              "score": 2.1
-            },
-            {
-              "ticker": "SOFA",
-              "score": 1.8
-            }
-          ]
-        }
-      ],
-      "rebalance": {
-        "date": "2026-06-17",
-        "added": [
-          "HLTA"
-        ],
-        "dropped": [
-          "INDB"
-        ]
-      }
-    },
-    {
       "name": "Volume C - SV-A7 +10% floor",
       "key": "C",
       "inception": "2026-04-03",
@@ -1981,6 +1567,69 @@
           "SOFB"
         ]
       }
+    },
+    {
+      "name": "A-G-W3 — SA-DEF, 3-day vol gate",
+      "key": "A-G-W3",
+      "inception": "2026-04-03",
+      "stats": {
+        "return_pct": 0.0,
+        "cagr": 0.0,
+        "max_dd": 0.0,
+        "win_rate": 0,
+        "sharpe": 0.0,
+        "n_trades": 0
+      },
+      "equity": [],
+      "benchmarks": {
+        "sp500": []
+      },
+      "holdings": [],
+      "candidates": [],
+      "trades": [],
+      "rebalance": null
+    },
+    {
+      "name": "A-SCORE-CLUST — SA-DEF, cluster score",
+      "key": "A-SCORE-CLUST",
+      "inception": "2026-04-03",
+      "stats": {
+        "return_pct": 0.0,
+        "cagr": 0.0,
+        "max_dd": 0.0,
+        "win_rate": 0,
+        "sharpe": 0.0,
+        "n_trades": 0
+      },
+      "equity": [],
+      "benchmarks": {
+        "sp500": []
+      },
+      "holdings": [],
+      "candidates": [],
+      "trades": [],
+      "rebalance": null
+    },
+    {
+      "name": "B-GATE-W3 — SB-B, 3-day vol gate",
+      "key": "B-GATE-W3",
+      "inception": "2026-04-03",
+      "stats": {
+        "return_pct": 0.0,
+        "cagr": 0.0,
+        "max_dd": 0.0,
+        "win_rate": 0,
+        "sharpe": 0.0,
+        "n_trades": 0
+      },
+      "equity": [],
+      "benchmarks": {
+        "sp500": []
+      },
+      "holdings": [],
+      "candidates": [],
+      "trades": [],
+      "rebalance": null
     }
   ]
 }

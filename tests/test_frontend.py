@@ -210,7 +210,8 @@ def test_dashboard_renders_without_js_errors(server):
     assert before_chips >= 1, "no active-filter chips rendered"
     assert after_chips < before_chips, "chip x did not remove a filter"
     assert robots_visible, "robots view did not show on toggle"
-    assert robot_cards == 5, f"expected 5 robot cards, got {robot_cards}"
+    from pipeline.robots import ROBOTS
+    assert robot_cards == len(ROBOTS), f"expected {len(ROBOTS)} robot cards, got {robot_cards}"
     assert rm_open == 1, "robot tearsheet did not open"
     assert rm_heatmap > 0, "monthly heatmap rendered no cells"
     assert rm_trade_rows > 0, "trade tape rendered no rows"

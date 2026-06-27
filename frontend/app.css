@@ -371,6 +371,9 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
 .rb-n { opacity: 0.6; }
 
 .rb-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+/* Candidate list: show ~5 rows, scroll the rest; keep the header pinned. */
+.rb-scroll { max-height: 140px; overflow-y: auto; }
+.rb-scroll .rb-table th { position: sticky; top: 0; background: var(--bg2); z-index: 1; }
 .rb-table th { text-align: left; font-size: 9px; text-transform: uppercase; color: var(--muted); padding: 3px 6px; border-bottom: 1px solid var(--border); }
 .rb-table td { padding: 4px 6px; border-bottom: 1px solid var(--border); }
 .rb-table tbody tr { cursor: pointer; }

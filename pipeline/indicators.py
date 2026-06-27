@@ -102,6 +102,13 @@ def _robot_group(g: pd.DataFrame) -> pd.DataFrame:
     up_w = dc.clip(lower=0).ewm(alpha=1 / 14, adjust=False).mean()
     dn_w = (-dc.clip(upper=0)).ewm(alpha=1 / 14, adjust=False).mean()
     g["rsi_wilder"] = 100 - (100 / (1 + up_w / dn_w.replace(0, np.nan)))
+
+    # Variant features used by experimental strategies; not in metrics.parquet.
+    v_avg20 = v.rolling(20, min_periods=5).mean()
+    g["vc_w3"] = (v.rolling(3, min_periods=1).mean() / v_avg20.replace(0, np.nan)) >= 1.5
+    # count of rvol>=2 days in the last 10 (matches backtest sv_build_features.py:
+    # rvol_20 = v / 20d-avg, threshold 2.0, rolling(10, min_periods=1)).
+    g["vol_cluster_10"] = ((v / v_avg20.replace(0, np.nan)) >= 2.0).rolling(10, min_periods=1).sum()
     return g
 
 
@@ -113,6 +120,67 @@ def add_robot_features(df: pd.DataFrame) -> pd.DataFrame:
     out["Ticker"] = src.loc[out.index, "Ticker"]      # pandas 3: restore dropped key
     out["rvol_rank_univ"] = out.groupby("Date")["rvol"].rank(pct=True)
     return out
+
+
+# ── Volume-profile value-area-low (robot-only; not in metrics.parquet) ─────────
+# Faithful port of backtest/scripts/compute_volume_profile.py. For each (ticker,
+# day) build a volume-by-price histogram over the PRIOR `lookback` bars (excluding
+# today), find the point-of-control bin, expand the value area outward until
+# `va_pct` of volume is captured, and return the value-area-low (lower edge). Used
+# only by the vp value-area-low exit (B-GATE-W3); computed on demand, not persisted.
+
+def _value_area_low(close_win, vol_win, nbins: int, va_pct: float) -> float:
+    lo, hi = close_win.min(), close_win.max()
+    if not np.isfinite(lo) or not np.isfinite(hi) or hi <= lo:
+        return np.nan
+    counts, edges = np.histogram(close_win, bins=nbins, range=(lo, hi), weights=vol_win)
+    total = counts.sum()
+    if total <= 0:
+        return np.nan
+    poc_i = int(counts.argmax())
+    lo_i = hi_i = poc_i
+    acc = counts[poc_i]
+    target = va_pct * total
+    while acc < target and (lo_i > 0 or hi_i < nbins - 1):
+        below = counts[lo_i - 1] if lo_i > 0 else -1
+        above = counts[hi_i + 1] if hi_i < nbins - 1 else -1
+        if above >= below:
+            hi_i += 1; acc += counts[hi_i]
+        else:
+            lo_i -= 1; acc += counts[lo_i]
+    return edges[lo_i]
+
+
+def add_vp_val(df: pd.DataFrame, lookback: int = 90, nbins: int = 40,
+               va_pct: float = 0.70, since=None) -> pd.DataFrame:
+    """Return df + a `vp_val` column (rolling volume-by-price value-area-low).
+    `since` (a Date) limits computation to bars on/after that date (prior bars are
+    still used for each window) so the sim window can skip pre-period work."""
+    src = df.sort_values(["Ticker", "Date"])
+    dates = src["Date"].to_numpy()
+    close = src["Close"].to_numpy(dtype=float)
+    vol   = src["Volume"].to_numpy(dtype=float)
+    out   = np.full(len(src), np.nan)
+    since_ts = np.datetime64(since) if since is not None else None
+    pos = 0
+    for _t, g in src.groupby("Ticker", sort=False):
+        m = len(g)
+        c, v, d = close[pos:pos + m], vol[pos:pos + m], dates[pos:pos + m]
+        for i in range(lookback, m):
+            if since_ts is not None and d[i] < since_ts:
+                continue
+            if not np.isfinite(c[i]):
+                continue
+            cw, vw = c[i - lookback:i], v[i - lookback:i]
+            ok = np.isfinite(cw) & np.isfinite(vw) & (vw >= 0)
+            if ok.sum() < 20:
+                continue
+            out[pos + i] = _value_area_low(cw[ok], vw[ok], nbins, va_pct)
+        pos += m
+    vp = pd.Series(out, index=src.index)
+    result = df.copy()
+    result["vp_val"] = vp.reindex(df.index)
+    return result
 
 
 # ── Stage classifier (vectorized, two-axis stair-step) ────────────────────────
