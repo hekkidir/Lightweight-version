@@ -85,7 +85,7 @@ jobs:
             docker compose exec -T screener python run.py pipeline
 
             echo "[$(date)] Exporting static JSON..."
-            docker compose exec -T screener python pipeline/export_static.py /app/data /app/static-export
+            docker compose exec -T screener python -m pipeline.export_static /app/data /app/static-export
 
             echo "[$(date)] Pushing to GitHub..."
             cp -r /opt/stock-analysis/static-export/. /opt/stock-analysis/repo/frontend/data/
