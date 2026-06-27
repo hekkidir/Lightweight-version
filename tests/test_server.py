@@ -74,8 +74,9 @@ def test_health_endpoint_ok(client):
 
 
 def test_robots_endpoint(client):
+    from pipeline.robots import ROBOTS
     data = client.get("/api/robots").json()
-    assert len(data["robots"]) == 5
+    assert len(data["robots"]) == len(ROBOTS)
     r0 = data["robots"][0]
     assert {"name", "key", "holdings", "candidates"} <= set(r0)
 

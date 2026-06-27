@@ -1,3 +1,7 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 # Screener (Lightweight) — AI working guide
 
 A standalone US-equity stage + rotation screener. Pipeline builds parquet files;
@@ -24,18 +28,36 @@ a FastAPI server serves them as JSON; a vanilla-JS frontend renders the dashboar
 
 ---
 
-## Verify a change (the one command)
+## Dev setup
 
 ```
-python -m pytest          # full suite, offline  ← run after every change
-python run.py check       # validate the built data dir (exit 1 on problems)
-python run.py pipeline --offline   # rebuild stages 2-4 from existing data, no network
+pip install -e ".[dev]"                        # installs runtime + dev deps (pytest, ruff, pyright, httpx, playwright)
+python -m playwright install chromium          # only needed for frontend smoke test
+```
+
+---
+
+## Verify a change
+
+```
+python -m pytest                               # full suite, offline — run after every change
+python -m pytest tests/test_classify.py -v    # single file; -k "test_name" for one function
+python run.py check                            # validate the built data dir (exit 1 on problems)
+python run.py pipeline --offline               # rebuild stages 2-5 from existing data, no network
+```
+
+**Lint / format / types** (ruff and pyright are configured in `pyproject.toml`):
+
+```
+ruff check .                                   # lint
+ruff format --check .                          # format check (no --check to auto-fix)
+pyright                                        # type check (basic mode; third-party stubs optional)
 ```
 
 Frontend changes are covered by a headless-browser smoke test
 (`tests/test_frontend.py`, Playwright) that loads the real dashboard and fails on
 any JS error. It runs as part of `pytest`; it skips cleanly if Playwright isn't
-installed (`pip install playwright && python -m playwright install chromium`).
+installed.
 
 If you change pipeline math **on purpose** and a golden test fails, regenerate the
 expected snapshot — but only after confirming the new numbers are correct:
@@ -44,13 +66,20 @@ expected snapshot — but only after confirming the new numbers are correct:
 python tests/update_golden.py
 ```
 
+If you need to regenerate the seeded test fixture itself (e.g. you changed its
+shape), run `python tests/make_fixture.py` — it uses a fixed seed so output is
+byte-stable across machines.
+
 ---
 
-## Architecture (5 lines)
+## Architecture
 
-- Flow: **download → indicators → sectors → rotation**, each writing a parquet in `data/`.
+- Flow: **download → indicators → sectors → rotation → robots**, each writing an
+  output file in `data/` (5 stages total).
 - `run()` in each stage is a thin I/O shell; all logic lives in **pure functions** (testable directly).
-- Config is a **typed singleton** — `from pipeline.config import cfg`; never hardcode a threshold.
+- Config is split into two typed singletons — never conflate them:
+  - `from pipeline.config import cfg` — analytical knobs from `config.ini` (thresholds, windows).
+  - `from pipeline.config import runtime` — deployment knobs from **env vars** (host, port, auth, CORS).
 - `pipeline/schema.py` is the **single source of truth** for every parquet's columns.
 - Server reads parquets → JSON; frontend fetches `/api/*` and renders. No build step.
 
@@ -60,9 +89,9 @@ python tests/update_golden.py
 
 | File | What it does |
 |------|--------------|
-| `run.py` | Orchestrator: `pipeline` / `serve` / `all` / `check`; skip logic; `--force` `--offline` |
-| `config.ini` | All tunable settings (thresholds, windows, rotation knobs) |
-| `pipeline/config.py` | Typed config singleton; `load()` reads `config.ini` → `cfg.stages.*`, `cfg.rotation.*` |
+| `run.py` | Orchestrator: `pipeline` / `bootstrap` / `serve` / `all` / `check`; skip logic; `--force` `--offline` |
+| `config.ini` | All tunable analytical settings (thresholds, windows, rotation knobs) |
+| `pipeline/config.py` | Two typed singletons: `cfg` (from `config.ini`) and `runtime` (from env vars); see `load()` and `load_runtime()` |
 | `pipeline/download.py` | yfinance OHLCV + market cap; 3-pass recovery; pre/regular live snapshot → `prices.parquet` |
 | `pipeline/indicators.py` | Per-ticker EMA/RSI/ATR/RVOL + `classify_stages()`; per-ticker latest bar → `metrics.parquet` |
 | `pipeline/sectors.py` | sqrt-mcap-weighted sector aggregation → `sectors.parquet` |
@@ -89,6 +118,7 @@ python tests/update_golden.py
 | `frontend/app.js` | State, two-layer focus model (group/pins), event wiring |
 | `frontend/app.css` | Dark theme |
 | `tests/` | Fixture generator + unit + golden + contract + health tests |
+| `tests/make_fixture.py` | Generates seeded `prices_sample.parquet` (run when fixture shape changes) |
 
 ---
 
@@ -102,6 +132,7 @@ python tests/update_golden.py
 - **Files stay under ~200 lines.**
 - **No hardcoded thresholds** — add to `config.ini` + the dataclass + `load()` in `config.py`.
 - **UI strings are Turkish; code and comments are English.**
+- **`cfg` vs `runtime`** — `cfg` is analytical (from `config.ini`); `runtime` is deployment (from env). Never read env vars in pipeline code; use `runtime` in server code only.
 
 ---
 
