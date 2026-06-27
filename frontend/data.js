@@ -3,13 +3,12 @@
  * Exports a single load() function that returns all dashboard data.
  */
 
-const API_BASE = "http://204.168.159.237:8000";
 const API = {
-  status:   `${API_BASE}/api/status`,
-  stocks:   `${API_BASE}/api/stocks`,
-  sectors:  `${API_BASE}/api/sectors`,
-  rotation: `${API_BASE}/api/rotation`,
-  robots:   `${API_BASE}/api/robots`,
+  status:   "./data/status.json",
+  stocks:   "./data/stocks.json",
+  sectors:  "./data/sectors.json",
+  rotation: "./data/rotation.json",
+  robots:   "./data/robots.json",
 };
 
 async function fetchJSON(url) {
@@ -35,7 +34,7 @@ async function loadAll() {
   return { stocks, sectors, rotation, status, robots };
 }
 
-// Per-ticker indicator series (last `days` bars) for the stock detail modal.
+// Per-ticker indicator series for the stock detail modal.
 async function fetchStock(ticker, days = 20) {
-  return fetchJSON(`${API_BASE}/api/stock/${encodeURIComponent(ticker)}?days=${days}`);
+  return fetchJSON(`./data/stock/${encodeURIComponent(ticker.toUpperCase())}.json`);
 }

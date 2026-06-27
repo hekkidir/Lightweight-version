@@ -3,13 +3,13 @@ name: Build & Deploy
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - "frontend/data/**"
 
 jobs:
   build-and-push:
     name: Build & push Docker image
     runs-on: ubuntu-latest
-    outputs:
-      image: ${{ steps.meta.outputs.tags }}
     steps:
       - uses: actions/checkout@v4
 
@@ -47,19 +47,60 @@ jobs:
           source: docker-compose.yml
           target: /opt/stock-analysis
 
-      - name: Pull image and restart
+      - name: Pull image, restart, configure data pipeline
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: 204.168.159.237
           username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: GH_PAT
           script: |
             cd /opt/stock-analysis
-            mkdir -p data
+            mkdir -p data static-export
+
             docker pull serdardursun/stock-analysis:latest
             docker compose up -d --remove-orphans
             docker image prune -f
 
-            # Install/update the pipeline cron job (runs Mon-Fri at 21:00 UTC = 4 PM ET)
-            CRON_JOB="0 21 * * 1-5 cd /opt/stock-analysis && docker compose exec -T screener python run.py pipeline >> /var/log/screener-pipeline.log 2>&1"
-            (crontab -l 2>/dev/null | grep -v "screener pipeline"; echo "$CRON_JOB") | crontab -
+            # Clone repo (first time) or pull latest
+            if [ ! -d /opt/stock-analysis/repo/.git ]; then
+              git clone https://$GH_PAT@github.com/hekkidir/Lightweight-version.git /opt/stock-analysis/repo
+            else
+              cd /opt/stock-analysis/repo
+              git remote set-url origin https://$GH_PAT@github.com/hekkidir/Lightweight-version.git
+              git pull
+            fi
+
+            cd /opt/stock-analysis/repo
+            git config user.email "pipeline@screener"
+            git config user.name "Screener Pipeline"
+
+            # Write the daily data-update script
+            cat > /opt/stock-analysis/update-data.sh << 'SCRIPT'
+            #!/bin/bash
+            set -e
+            cd /opt/stock-analysis
+
+            echo "[$(date)] Running pipeline..."
+            docker compose exec -T screener python run.py pipeline
+
+            echo "[$(date)] Exporting static JSON..."
+            docker compose exec -T screener python pipeline/export_static.py /app/data /app/static-export
+
+            echo "[$(date)] Pushing to GitHub..."
+            cp -r /opt/stock-analysis/static-export/. /opt/stock-analysis/repo/frontend/data/
+            cd /opt/stock-analysis/repo
+            git pull
+            git add frontend/data/
+            git diff --staged --quiet && echo "No data changes." && exit 0
+            git commit -m "data: auto-update $(date +%Y-%m-%d)"
+            git push
+            echo "[$(date)] Done."
+            SCRIPT
+            chmod +x /opt/stock-analysis/update-data.sh
+
+            # Install/update cron (Mon-Fri 21:00 UTC = 4 PM ET)
+            CRON_JOB="0 21 * * 1-5 /opt/stock-analysis/update-data.sh >> /var/log/screener-pipeline.log 2>&1"
+            (crontab -l 2>/dev/null | grep -v "update-data.sh"; echo "$CRON_JOB") | crontab -
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}

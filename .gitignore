@@ -1,5 +1,5 @@
-# ── Generated / live-updating data (rebuilt by the pipeline every run) ──
-# tickers.csv is the hand-edited seed input and IS tracked (it's .csv, not parquet).
+# ── Pipeline data (parquets live on the server only, not in git) ──
+/data/
 .server.log
 
 # ── Python ──

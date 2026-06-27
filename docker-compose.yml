@@ -6,6 +6,7 @@ services:
       - "8000:8000"
     volumes:
       - /opt/stock-analysis/data:/app/data
+      - /opt/stock-analysis/static-export:/app/static-export
     environment:
       SCREENER_HOST: "0.0.0.0"
       SCREENER_PORT: "8000"
