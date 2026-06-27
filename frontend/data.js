@@ -34,7 +34,12 @@ async function loadAll() {
   return { stocks, sectors, rotation, status, robots };
 }
 
-// Per-ticker indicator series for the stock detail modal.
-async function fetchStock(ticker, days = 20) {
-  return fetchJSON(`./data/stock/${encodeURIComponent(ticker.toUpperCase())}.json`);
+// Lazily loaded bundle; cached in memory for the session.
+let _detailBundle = null;
+
+async function fetchStock(ticker) {
+  if (!_detailBundle) _detailBundle = await fetchJSON("./data/stocks_detail.json");
+  const data = _detailBundle[ticker.toUpperCase()];
+  if (!data) throw new Error(`No detail for ${ticker}`);
+  return data;
 }
