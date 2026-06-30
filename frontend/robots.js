@@ -60,31 +60,59 @@ function _holdingsTable(holdings, byTicker) {
       <td class="rb-sec">${sector}</td>
       <td>${stage}</td>
       <td>${hd.entry_date ? escHTML(hd.entry_date) : "—"}</td>
+      <td>${hd.entry_price != null ? "$" + fmt(hd.entry_price) : "—"}</td>
       <td class="${hd.return_pct >= 0 ? "pos" : "neg"}">${hd.return_pct != null ? fmtPct(hd.return_pct) : "—"}</td>
       <td>${hd.weight != null ? (hd.weight * 100).toFixed(0) + "%" : "—"}</td>
     </tr>`;
   }).join("");
   return `<table class="rb-table">
-    <thead><tr><th>Hisse</th><th>Sektör</th><th>Stage</th><th>Giriş</th><th>Getiri</th><th>Ağ.</th></tr></thead>
+    <thead><tr><th>Hisse</th><th>Sektör</th><th>Stage</th><th>Giriş</th><th>Giriş Fiy.</th><th>Getiri</th><th>Ağ.</th></tr></thead>
     <tbody>${rows}</tbody></table>`;
+}
+
+const SIG_LABEL = { NEXT_BUY: "Yarın Al", STRONG_BUY: "Güçlü Al", NEAR: "2/3 Yakın", SCORE_ONLY: "Sadece Skor" };
+const SIG_CLS   = { NEXT_BUY: "sig-next", STRONG_BUY: "sig-strong", NEAR: "sig-near", SCORE_ONLY: "sig-score" };
+const SIG_TITLE = {
+  NEXT_BUY: "Yarın açılışta alınacak (T+1)", STRONG_BUY: "Tüm filtreleri geçti — geçerli aday",
+  NEAR: "Uygun değil ama yakın — 3 momentumdan 2'si geçti", SCORE_ONLY: "Skoru yüksek ama momentum/kapı geçilmedi",
+};
+
+function _sigBadge(sig) {
+  if (!sig) return "—";
+  return `<span class="rb-sig ${SIG_CLS[sig] || ""}" title="${escAttr(SIG_TITLE[sig] || "")}">${escHTML(SIG_LABEL[sig] || sig)}</span>`;
+}
+
+function _h4Marks(h4) {
+  if (!Array.isArray(h4)) return "—";
+  return h4.map(b => `<span class="${b ? "h4-y" : "h4-n"}">${b ? "✓" : "✗"}</span>`).join(" ");
 }
 
 function _candidatesTable(cands, byTicker) {
   if (!cands || !cands.length)
     return '<div class="rb-empty-sm">Aday yok.</div>';
+  const anyBuy = cands.some(c => c.next_buy);
   const rows = cands.map(c => {
-    const { sector, stage } = _liveCells(c.ticker, byTicker);
-    return `<tr data-ticker="${escAttr(c.ticker)}">
+    const sector = c.sector ? escHTML(c.sector) : _liveCells(c.ticker, byTicker).sector;
+    const stage = c.stage
+      ? `<span class="stage-badge ${stageCls(c.stage)}">${escHTML(c.stage)}</span>`
+      : _liveCells(c.ticker, byTicker).stage;
+    const buyCls = c.next_buy ? " rb-nextbuy" : "";
+    return `<tr data-ticker="${escAttr(c.ticker)}" class="${buyCls.trim()}">
       <td class="rb-tkr">${escHTML(c.ticker)}</td>
       <td class="rb-sec">${sector}</td>
       <td>${stage}</td>
       <td>${c.score != null ? fmt(c.score) : "—"}</td>
-      <td class="rb-why" title="${escAttr(c.reason || "")}">${escHTML(c.reason || "")}</td>
+      <td>${_sigBadge(c.signal)}</td>
+      <td class="${c.daily >= 0 ? "pos" : "neg"}">${c.daily != null ? fmtPct(c.daily) : "—"}</td>
+      <td class="${c.weekly >= 0 ? "pos" : "neg"}">${c.weekly != null ? fmtPct(c.weekly) : "—"}</td>
+      <td>${c.atr_pct != null ? fmt(c.atr_pct, 1) + "%" : "—"}</td>
+      <td>${c.ext_atr != null ? fmt(c.ext_atr) : "—"}</td>
+      <td class="rb-h4">${_h4Marks(c.h4)}</td>
     </tr>`;
   }).join("");
-  // Capped to ~5 rows; the rest scroll within the panel (header stays pinned).
-  return `<div class="rb-scroll"><table class="rb-table">
-    <thead><tr><th>Hisse</th><th>Sektör</th><th>Stage</th><th>Skor</th><th>Neden</th></tr></thead>
+  const legend = anyBuy ? '<div class="rb-buylegend"><span class="rb-sig sig-next">Yarın Al</span> = yarın açılışta alınacak (T+1)</div>' : "";
+  return `${legend}<div class="rb-scroll rb-scroll-x"><table class="rb-table rb-ctable">
+    <thead><tr><th>Hisse</th><th>Sektör</th><th>Stg</th><th>Skor</th><th>Sinyal</th><th>Gün</th><th>Hafta</th><th>ATR%</th><th>Ext</th><th title="1A·3A·6A momentum ≥ %90">H4</th></tr></thead>
     <tbody>${rows}</tbody></table></div>`;
 }
 

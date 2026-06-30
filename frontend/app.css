@@ -382,6 +382,22 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
 .rb-sec { color: var(--muted); max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rb-why { color: var(--muted); max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rb-name[data-robot] { cursor: pointer; }
+/* Candidate signal ladder */
+.rb-scroll-x { overflow-x: auto; }
+.rb-ctable { min-width: 560px; }
+.rb-ctable td, .rb-ctable th { white-space: nowrap; }
+.rb-table tbody tr.rb-nextbuy { background: rgba(16,185,129,0.10); }
+.rb-table tbody tr.rb-nextbuy:hover { background: rgba(16,185,129,0.18); }
+.rb-buylegend { font-size: 10px; color: var(--muted); padding: 2px 6px 5px; display: flex; align-items: center; gap: 5px; }
+.rb-sig { display: inline-block; font-size: 9px; font-weight: 700; letter-spacing: .2px; padding: 1px 6px;
+          border-radius: 4px; border: 1px solid transparent; white-space: nowrap; }
+.rb-sig.sig-next   { color: #10b981; background: rgba(16,185,129,0.14); border-color: rgba(16,185,129,0.45); }
+.rb-sig.sig-strong { color: #3b82f6; background: rgba(59,130,246,0.14); border-color: rgba(59,130,246,0.45); }
+.rb-sig.sig-near   { color: #f59e0b; background: rgba(245,158,11,0.12); border-color: rgba(245,158,11,0.45); }
+.rb-sig.sig-score  { color: var(--muted); background: rgba(148,163,184,0.10); border-color: rgba(148,163,184,0.35); }
+.rb-h4 { font-weight: 700; letter-spacing: 1px; }
+.rb-h4 .h4-y { color: #10b981; }
+.rb-h4 .h4-n { color: #ef4444; opacity: .7; }
 .rb-name[data-robot]:hover { color: var(--accent); }
 .rb-detay { color: var(--muted); font-weight: 400; }
 
@@ -460,12 +476,13 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
 #rm-trades-wrap { display: flex; flex-direction: column; gap: 3px; max-height: 320px; overflow-y: auto; }
 .rm-trade { border: 1px solid var(--border); border-radius: 6px; padding: 5px 8px; background: var(--bg); }
 .rm-trade-main {
-  display: grid; grid-template-columns: 64px 1fr 150px 56px 40px 1fr; gap: 8px;
+  display: grid; grid-template-columns: 64px 1fr 150px 120px 56px 40px 1fr; gap: 8px;
   align-items: center; font-size: 11px;
 }
 .rm-trade-main .rb-tkr { cursor: pointer; }
 .rm-trade-main .rb-tkr:hover { color: var(--accent); }
 .rm-tdate { color: var(--muted); font-variant-numeric: tabular-nums; }
+.rm-tprice { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .rm-tdays { color: var(--muted); text-align: right; }
 .rm-tstatus { font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 3px; justify-self: start; }
 .rm-open { background: rgba(16,185,129,0.18); color: var(--pos); }

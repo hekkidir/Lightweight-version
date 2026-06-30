@@ -3,6 +3,45 @@
 All notable changes to this project are recorded here
 Format follows [Keep a Changelog](https://keepachangelog.com/); versions use [SemVer](https://semver.org/).
 
+## [0.11.0] — 2026-06-30
+
+### Fixed
+- **Robot holdings showed bogus negative returns on freshly-entered positions.**
+  `_finalize`'s `_last()` helper preferred `last_px` (a ticker's last price *while
+  held*) over `last_closes` (the current cross-section close). For a name held in
+  an earlier stint, exited, then re-entered on the final bar, `last_px` still held
+  the stale close from that prior exit — so a `days_held=0` position was marked
+  against an old price and reported a spurious return (e.g. ADEA `-17%`, FCEL
+  `-56%`). Now the current close takes priority, with `last_px` only as a fallback
+  for a ticker absent from the final bar (held through a data gap), mirroring the
+  equity-curve `_mtm`. Headline stats (CAGR/return/Sharpe/MaxDD) were never
+  affected — they come from the equity array, which already used the correct order.
+- **T+1 robots showed their last-bar picks as "bought today".** The next-open
+  (Tuesday-fill) robots (A-G-W3, A-SCORE-CLUST, B-GATE-W3) decide on a bar's close
+  and fill at the *next* bar's open. On the final bar there is no next bar, so the
+  rebalance was force-filled at that day's close and stamped `entry_date = today`
+  — surfacing the pending next-open picks as if they were current holdings. Now a
+  T+1 robot skips transacting on the final bar (only marks to market); those picks
+  show up as candidates instead, and holdings reflect the real prior fills with
+  correct entry dates. Returns are unchanged (a close fill marked at the same close
+  moves nothing) — verified identical to baseline: 5057.3 / 4022.9 / 14129.5%.
+
+### Added
+- **Entry/exit prices in the Robots view.** Holdings tables (Robots page + robot
+  tearsheet) now show a `Giris Fiy.` (entry price) column; the tearsheet trade log
+  shows `entry -> exit` prices per trade. Backed by new `entry_price`/`price`
+  fields on holdings and `entry_price`/`exit_price` on trades in `robots.json`.
+- **Candidate signal ladder.** The robot candidate list is now a graded ladder over
+  the stage-2 universe with a badge per name: **Yarın Al** (NEXT_BUY — T+1 pick to be
+  bought at tomorrow's open, only while pending), **Güçlü Al** (STRONG_BUY — passes the
+  robot's full gate), **2/3 Yakın** (NEAR — not eligible but 2 of 3 H4 momentum ranks
+  pass), **Sadece Skor** (SCORE_ONLY — high score, weak momentum). Each row also shows
+  daily %, weekly %, ATR%, ATR-extension, and the H4 ✓✓✗ momentum marks (1M·3M·6M ≥ 0.9).
+  Eligibility, the buy set, and eligible scores come from the same selector the sim
+  uses; near-misses are scored for display only. The candidate **Sektör** is the custom
+  list that feeds the dashboard (display only — robots still compute on GICS). Backed by
+  `_signal_candidates` → `signal`/`next_buy`/`daily`/`weekly`/`atr_pct`/`ext_atr`/`h4`/`sector`.
+
 ## [0.10.2] — 2026-06-24
 
 ### Fixed

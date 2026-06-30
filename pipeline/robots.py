@@ -377,6 +377,77 @@ def candidates(cfg: Config, data_dir: Path, n=15) -> dict:
     return {r[0]: _candidates_for(r[0], r[2], r[4], ft, n) for r in ROBOTS}
 
 
+# ── Candidate signal ladder (dashboard) ───────────────────────────────────────
+# Classifies the stage-2 universe per robot into a strength ladder:
+#   NEXT_BUY    top-d_n the robot buys at the next open (only while pending)
+#   STRONG_BUY  passes the robot's full entry gate (a valid hold, not selected)
+#   NEAR        not eligible, but 2/3 H4 momentum ranks (>=0.9) pass — one step away
+#   SCORE_ONLY  not eligible, weak momentum (H4<=1) — surfaced for awareness
+SIGNAL_TIER = {"NEXT_BUY": 0, "STRONG_BUY": 1, "NEAR": 2, "SCORE_ONLY": 3}
+
+
+def _signal_score(kind: str, sub: pd.DataFrame, key: str) -> pd.Series:
+    """Robot score over an arbitrary frame, for the candidate-ladder display
+    (mirrors _candidates_for's scoring so numbers are comparable)."""
+    if kind == "sv":
+        s = _shared(sub)
+    elif kind == "sa":
+        s = _multifactor(sub)
+        if key in SCORE_EXTRA:
+            s = s + SCORE_EXTRA[key](sub)
+    else:                                  # sb
+        s = _dashboard(sub, graded=True)
+    tilt = SECTOR_TILT.get(key)
+    if tilt is not None:
+        s = s * sub["GICS"].map(tilt).fillna(1.0)
+    return s
+
+
+def _signal_candidates(rcfg, ft: pd.DataFrame, pending: bool, n_show: int = 12) -> list:
+    """Ladder of candidates (eligible + near-misses) for one robot. Eligibility,
+    the buy set, AND the eligible scores come from the real _candidates_for (so they
+    match the sim); near-misses are the rest of the stage-2 universe, scored for
+    display only and tagged NEAR (2/3 H4) or SCORE_ONLY (weak momentum)."""
+    key, _name, kind, d_n, vscreen, _sizing, _exit = rcfg
+    elig_df = _candidates_for(key, kind, vscreen, ft, n=999)        # real gate + score
+    elig_order = list(elig_df.index)
+    buy_set = set(elig_order[:d_n]) if pending else set()
+    elig_set = set(elig_order)
+    real_score = elig_df["score"].to_dict()
+
+    base = ft[ft["stage"].isin(["2A", "2B", "2C"])]
+    near_idx = [t for t in base.index if t not in elig_set]
+    near_score = _signal_score(kind, base.loc[near_idx], key).to_dict() if near_idx else {}
+
+    def _row(t, sig, score):
+        r = ft.loc[t]
+        h4 = [bool(r.get("ret_1m_rank", 0) >= 0.9),
+              bool(r.get("ret_3m_rank", 0) >= 0.9),
+              bool(r.get("ret_6m_rank", 0) >= 0.9)]
+        atrp = float(r["atr_pct"]) if pd.notna(r.get("atr_pct")) else None
+        extp = float(r["ext"]) if pd.notna(r.get("ext")) else None      # percent ext
+        ext_atr = (extp / atrp) if (atrp and atrp > 0 and extp is not None) else None
+        return {
+            # Sector = the CUSTOM list (from tickers.csv) that feeds the dashboard,
+            # not GICS (which the robots use only internally for rotation).
+            "ticker": str(t), "sector": str(r.get("Sector") or r.get("GICS") or ""), "stage": str(r.get("stage") or ""),
+            "score": round(float(score), 2) if pd.notna(score) else None,
+            "signal": sig, "next_buy": sig == "NEXT_BUY",
+            "daily":  round(float(r["change_pct"]), 2) if pd.notna(r.get("change_pct")) else None,
+            "weekly": round(float(r["weekly"]), 2) if pd.notna(r.get("weekly")) else None,
+            "atr_pct": round(atrp, 1) if atrp is not None else None,
+            "ext_atr": round(ext_atr, 2) if ext_atr is not None else None,
+            "h4": h4,
+        }
+
+    rows = [_row(t, "NEXT_BUY" if t in buy_set else "STRONG_BUY", real_score.get(t)) for t in elig_order]
+    for t in near_idx:
+        h4n = sum(_row(t, "", None)["h4"])
+        rows.append(_row(t, "NEAR" if h4n >= 2 else "SCORE_ONLY", near_score.get(t)))
+    rows.sort(key=lambda x: (SIGNAL_TIER[x["signal"]], -(x["score"] if x["score"] is not None else -999)))
+    return rows[:n_show]
+
+
 # ── Portfolio simulation ──────────────────────────────────────────────────────
 
 def _close_trade(trades, t, p, exit_date, exit_px, reason):
@@ -384,6 +455,8 @@ def _close_trade(trades, t, p, exit_date, exit_px, reason):
     ret = (exit_px / epx - 1) * 100 if (pd.notna(exit_px) and epx) else 0.0
     trades.append({"ticker": t, "entry_date": p["entry_date"].strftime("%Y-%m-%d"),
                    "exit_date": exit_date.strftime("%Y-%m-%d"), "return_pct": round(ret, 1),
+                   "entry_price": round(float(epx), 2) if epx else None,
+                   "exit_price": round(float(exit_px), 2) if pd.notna(exit_px) else None,
                    "days_held": (exit_date - p["entry_date"]).days, "exit_reason": reason,
                    "entry_candidates": p["entry_cands"]})
 
@@ -430,6 +503,18 @@ def _simulate(rcfg, by_date, panel, gp, dates) -> dict:
         nd = dates[i + 1] if i + 1 < len(dates) else None
         ndf = by_date.get(nd) if nd is not None else None
         fdate = nd if (next_open and nd is not None) else d
+
+        # T+1 robots fill at the NEXT bar's open. On the final bar there is no
+        # next bar, so a decision made here is a PENDING next-open action (it
+        # surfaces as a candidate), not an executed fill — transacting would
+        # force a same-bar close fill and stamp holdings as "bought today".
+        # Skip exits + rebalance on that bar and only mark to market; equity is
+        # unchanged (a close fill marked at the same close moves nothing).
+        # T+0 robots fill same-bar, so they always transact.
+        if next_open and nd is None:
+            equity.append({"date": d.strftime("%Y-%m-%d"),
+                           "value": round(_mtm(cash, positions, closes, last_px), 6)})
+            continue
 
         # 1. Exits: decide on today's close, execute at next-day open (T+1).
         # A held ticker absent today is HELD THROUGH the gap (frozen at last close),
@@ -528,7 +613,14 @@ def _finalize(rcfg, positions, trades, equity, rebal, last_date, last_closes, la
     eq = [{"date": e["date"], "value": round(e["value"] / e0 * 100, 2)} for e in equity]
 
     def _last(t, p):
-        v = last_px.get(t, last_closes.get(t, np.nan))
+        # Current close takes priority; last_px is only a fallback for a ticker
+        # absent from the final bar (held through a data gap). Preferring last_px
+        # would use a STALE close left over from a prior holding stint for a name
+        # re-entered on the final bar — making a days_held=0 position show a
+        # bogus non-zero return.
+        v = last_closes.get(t, np.nan)
+        if pd.isna(v):
+            v = last_px.get(t, np.nan)
         return v if pd.notna(v) else p["entry_price"]
 
     final_val = sum(p["shares"] * _last(t, p) for t, p in positions.items()) or 1.0
@@ -537,10 +629,13 @@ def _finalize(rcfg, positions, trades, equity, rebal, last_date, last_closes, la
         px = _last(t, p)
         holdings.append({"ticker": t, "weight": round(p["shares"] * px / final_val, 2),
                          "entry_date": p["entry_date"].strftime("%Y-%m-%d"),
+                         "entry_price": round(float(p["entry_price"]), 2),
+                         "price": round(float(px), 2),
                          "return_pct": round((px / p["entry_price"] - 1) * 100, 1),
                          "days_held": (last_date - p["entry_date"]).days})
         trades.append({"ticker": t, "entry_date": p["entry_date"].strftime("%Y-%m-%d"),
                        "exit_date": None, "return_pct": round((px / p["entry_price"] - 1) * 100, 1),
+                       "entry_price": round(float(p["entry_price"]), 2), "exit_price": None,
                        "days_held": (last_date - p["entry_date"]).days, "exit_reason": "",
                        "entry_candidates": p["entry_cands"]})
 
@@ -589,13 +684,18 @@ def build_robots(cfg: Config, data_dir: Path, lookback_days: int = 504) -> dict:
         panel = indicators.add_vp_val(panel, since=sim_dates[0])
     by_date = {d: g.set_index("Ticker") for d, g in panel.groupby("Date")}
     today_ft = _ft_for_day(panel, gp, end)
+    # A T+1 robot whose last settled bar is a Monday has just rebalanced and will
+    # buy its top-d_n picks at the NEXT open — flag those candidates so the UI can
+    # mark "yarin acilista alinacak" (to be bought at tomorrow's open).
+    monday_close = pd.Timestamp(end).weekday() == 0
 
     robots = []
     for rcfg in ROBOTS:
         out = _simulate(rcfg, by_date, panel, gp, sim_dates)
-        cands = _candidates_for(rcfg[0], rcfg[2], rcfg[4], today_ft, n=15)
-        out["candidates"] = [{"ticker": t, "score": round(float(cands.loc[t, "score"]), 2),
-                              "reason": str(cands.loc[t, "reason"])} for t in cands.index]
+        is_t1 = rcfg[0] in NEXT_OPEN_KEYS or NEXT_OPEN_FILL
+        pending = monday_close and is_t1
+        out["next_open_pending"] = bool(pending)
+        out["candidates"] = _signal_candidates(rcfg, today_ft, pending, n_show=12)
         out["benchmarks"] = {"sp500": _rebase(spy_s, [e["date"] for e in out["equity"]])}
         robots.append(out)
     return {"generated_at": datetime.now().isoformat(timespec="seconds"), "robots": robots}

@@ -173,11 +173,15 @@ function _rmTradeRows(trades, byTicker, months) {
     const status = open
       ? '<span class="rm-tstatus rm-open">Açık</span>'
       : `<span class="rm-treason" title="${escAttr(t.exit_reason || "")}">${escHTML(t.exit_reason || "Kapandı")}</span>`;
+    const priceTxt = t.entry_price != null
+      ? `$${fmt(t.entry_price)} → ${open ? "açık" : (t.exit_price != null ? "$" + fmt(t.exit_price) : "—")}`
+      : "";
     return `<div class="rm-trade">
       <div class="rm-trade-main">
         <span class="rb-tkr" data-ticker="${escAttr(t.ticker)}">${escHTML(t.ticker)}</span>
         <span class="rb-sec">${sector}</span>
         <span class="rm-tdate">${escHTML(t.entry_date || "—")} → ${open ? "açık" : escHTML(t.exit_date)}</span>
+        <span class="rm-tprice">${priceTxt}</span>
         <span class="${t.return_pct >= 0 ? "pos" : "neg"}">${t.return_pct != null ? fmtPct(t.return_pct) : "—"}</span>
         <span class="rm-tdays">${t.days_held != null ? t.days_held + "g" : "—"}</span>
         ${status}
