@@ -99,8 +99,8 @@ jobs:
             SCRIPT
             chmod +x /opt/stock-analysis/update-data.sh
 
-            # Install/update cron (Mon-Fri 21:00 UTC = 4 PM ET)
-            CRON_JOB="0 21 * * 1-5 /opt/stock-analysis/update-data.sh >> /var/log/screener-pipeline.log 2>&1"
-            (crontab -l 2>/dev/null | grep -v "update-data.sh"; echo "$CRON_JOB") | crontab -
+            # Install/update cron (Mon-Fri 16:20 New York time)
+            CRON_JOB="20 16 * * 1-5 /opt/stock-analysis/update-data.sh >> /var/log/screener-pipeline.log 2>&1"
+            (echo "CRON_TZ=America/New_York"; crontab -l 2>/dev/null | grep -v "^CRON_TZ" | grep -v "update-data.sh"; echo "$CRON_JOB") | crontab -
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
