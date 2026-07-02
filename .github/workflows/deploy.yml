@@ -82,7 +82,7 @@ jobs:
             cd /opt/stock-analysis
 
             echo "[$(date)] Running pipeline..."
-            docker compose exec -T screener python run.py pipeline
+            docker compose exec -T screener python run.py pipeline --force
 
             echo "[$(date)] Exporting static JSON..."
             docker compose exec -T screener python -m pipeline.export_static /app/data /app/static-export
