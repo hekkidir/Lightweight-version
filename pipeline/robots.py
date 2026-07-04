@@ -413,7 +413,7 @@ def _signal_candidates(rcfg, ft: pd.DataFrame, pending: bool, n_show: int = 12) 
     elig_order = list(elig_df.index)
     buy_set = set(elig_order[:d_n]) if pending else set()
     elig_set = set(elig_order)
-    real_score = elig_df["score"].to_dict()
+    real_score = elig_df["score"].to_dict() if "score" in elig_df.columns else {}
 
     base = ft[ft["stage"].isin(["2A", "2B", "2C"])]
     near_idx = [t for t in base.index if t not in elig_set]
