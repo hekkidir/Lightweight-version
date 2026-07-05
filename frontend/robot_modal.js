@@ -1,7 +1,7 @@
 /**
  * robot_modal.js — per-robot tearsheet modal (opened from a robot card header).
  *
- * Panels: performance chart (robot vs S&P 500 vs Nasdaq 100, rebased to 100) +
+ * Panels: performance chart (robot vs S&P 500, rebased to 100) +
  * drawdown, stats, monthly-returns heatmap, holdings sector allocation, current
  * holdings + candidates, closed-trade log, last-rebalance activity.
  * Series come from /api/robots; tickers are live-joined via byTicker.
@@ -21,7 +21,6 @@ function _drawPerf(canvas, robot) {
   const bm = robot.benchmarks || {};
   const lines = [{ vals: robot.equity, color: "#3b82f6", w: 1.9 }];
   if (bm.sp500) lines.push({ vals: bm.sp500, color: "#94a3b8", w: 1.2 });
-  if (bm.ndx)   lines.push({ vals: bm.ndx,   color: "#a855f7", w: 1.2 });
   const all = [];
   lines.forEach(l => (l.vals || []).forEach(p => all.push(p.value)));
   if (!all.length) return;
@@ -119,9 +118,11 @@ function _alloc(holdings, byTicker) {
     <span class="rm-alloc-v">${(w * 100).toFixed(0)}%</span></div>`).join("");
 }
 
-function _rmStats(s) {
+function _rmStats(s, equity) {
   if (!s) return "";
   const t = (l, v, cls = "") => `<div class="rm-tile"><span class="rm-tile-l">${l}</span><span class="rm-tile-v ${cls}">${v}</span></div>`;
+  const p = _periodReturns(equity);
+  const pt = (l, v) => v == null ? "" : t(l, fmtPct(v), v >= 0 ? "pos" : "neg");
   return `<div class="rm-stats">
     ${t("Getiri", fmtPct(s.return_pct), s.return_pct >= 0 ? "pos" : "neg")}
     ${t("CAGR", fmtPct(s.cagr), s.cagr >= 0 ? "pos" : "neg")}
@@ -129,7 +130,8 @@ function _rmStats(s) {
     ${t("MaxDD", fmtPct(s.max_dd), "neg")}
     ${t("Kazanç%", s.win_rate != null ? s.win_rate + "%" : "—")}
     ${t("İşlem", s.n_trades != null ? s.n_trades : "—")}
-    ${t("Poz.", s.exposure != null ? (s.exposure * 100).toFixed(0) + "%" : "—")}
+    ${t("Nakit", s.cash_pct != null ? s.cash_pct.toFixed(0) + "%" : "—")}
+    ${pt("Hafta", p.weekly)}${pt("Ay", p.monthly)}${pt("YTD", p.ytd)}
   </div>`;
 }
 
@@ -229,13 +231,13 @@ function _rmRebal(rb) {
 
 function _rmRender(robot, byTicker) {
   const legend = `<span class="rm-legend">
-    <i style="background:#3b82f6"></i>Robot <i style="background:#94a3b8"></i>S&P 500 <i style="background:#a855f7"></i>Nasdaq 100</span>`;
+    <i style="background:#3b82f6"></i>Robot <i style="background:#94a3b8"></i>S&P 500</span>`;
   return `<div class="rm-head">
       <div class="rm-key">${escHTML(robot.key || "")}</div>
       <div class="rm-name">${escHTML(robot.name || "")}</div>
       <button id="rm-pin" class="rb-pin">📌 Sektörleri sabitle</button>
     </div>
-    ${_rmStats(robot.stats)}
+    ${_rmStats(robot.stats, robot.equity)}
     <div class="rm-lbl">Performans — başlangıçtan beri ${legend}</div>
     <canvas id="rm-perf"></canvas>
     <div class="rm-lbl">Geri çekilme (drawdown)</div>
@@ -246,7 +248,7 @@ function _rmRender(robot, byTicker) {
         <div class="rm-lbl" style="margin-top:10px">Sektör dağılımı</div>${_alloc(robot.holdings, byTicker)}
       </div>
       <div>
-        <div class="rm-lbl">Tutuyor <span class="rb-n">${(robot.holdings || []).length}</span></div>${_holdingsTable(robot.holdings, byTicker)}
+        <div class="rm-lbl">Tutuyor <span class="rb-n">${(robot.holdings || []).length}</span></div>${_holdingsTable(robot.holdings, byTicker, robot.stats && robot.stats.cash_pct)}
         <div class="rm-lbl rm-lbl-cand" style="margin-top:10px">Sıradaki Adaylar <span class="rb-n">${(robot.candidates || []).length}</span></div>${_candidatesTable(robot.candidates, byTicker)}
       </div>
     </div>

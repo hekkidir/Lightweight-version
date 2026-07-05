@@ -378,6 +378,9 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
 .rb-table td { padding: 4px 6px; border-bottom: 1px solid var(--border); }
 .rb-table tbody tr { cursor: pointer; }
 .rb-table tbody tr:hover { background: var(--bg3); }
+.rb-cash-row { cursor: default; font-style: italic; }
+.rb-cash-row:hover { background: transparent; }
+.rb-cash-row td:last-child { font-style: normal; }
 .rb-tkr { font-weight: 700; }
 .rb-sec { color: var(--muted); max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rb-why { color: var(--muted); max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

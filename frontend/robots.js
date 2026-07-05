@@ -11,6 +11,29 @@ const STAT_LABELS = {
   win_rate: "Kazanç%", sharpe: "Sharpe",
 };
 
+// Weekly/monthly/YTD return, computed client-side from the equity curve (a list
+// of {date, value} rebased to 100 at inception) — no backend field needed.
+function _periodReturns(equity) {
+  if (!equity || equity.length < 2) return { weekly: null, monthly: null, ytd: null };
+  const n = equity.length;
+  const last = equity[n - 1].value;
+  const back = days => equity[Math.max(0, n - 1 - days)].value;
+  const year = equity[n - 1].date.slice(0, 4);
+  const ytdStart = equity.find(p => p.date.slice(0, 4) === year);
+  return {
+    weekly: (last / back(5) - 1) * 100,
+    monthly: (last / back(21) - 1) * 100,
+    ytd: ytdStart ? (last / ytdStart.value - 1) * 100 : null,
+  };
+}
+
+function _periodChips(equity) {
+  const p = _periodReturns(equity);
+  const chip = (label, v) => v == null ? "" :
+    `<span class="rb-stat"><span class="rb-stat-l">${label}</span><span class="rb-stat-v ${v >= 0 ? "pos" : "neg"}">${fmtPct(v)}</span></span>`;
+  return chip("Hafta", p.weekly) + chip("Ay", p.monthly) + chip("YTD", p.ytd);
+}
+
 function _drawSparkline(canvas, values) {
   const ctx = canvas.getContext("2d");
   const W = canvas.width, H = canvas.height, pad = 2;
@@ -50,9 +73,11 @@ function _liveCells(t, byTicker) {
   return { sector, stage };
 }
 
-function _holdingsTable(holdings, byTicker) {
-  if (!holdings || !holdings.length)
-    return '<div class="rb-empty-sm">Pozisyon yok — nakitte.</div>';
+function _holdingsTable(holdings, byTicker, cashPct) {
+  if (!holdings || !holdings.length) {
+    const pct = cashPct != null ? ` (Nakit ${cashPct.toFixed(0)}%)` : "";
+    return `<div class="rb-empty-sm">Pozisyon yok — nakitte${pct}.</div>`;
+  }
   const rows = holdings.map(hd => {
     const { sector, stage } = _liveCells(hd.ticker, byTicker);
     return `<tr data-ticker="${escAttr(hd.ticker)}">
@@ -65,9 +90,13 @@ function _holdingsTable(holdings, byTicker) {
       <td>${hd.weight != null ? (hd.weight * 100).toFixed(0) + "%" : "—"}</td>
     </tr>`;
   }).join("");
+  // Cash row: holdings weights are now shares of the WHOLE portfolio (stocks +
+  // cash), so this row + the stock rows above sum to exactly 100%.
+  const cashRow = cashPct != null
+    ? `<tr class="rb-cash-row"><td colspan="6" class="muted">Nakit</td><td>${cashPct.toFixed(0)}%</td></tr>` : "";
   return `<table class="rb-table">
     <thead><tr><th>Hisse</th><th>Sektör</th><th>Stage</th><th>Giriş</th><th>Giriş Fiy.</th><th>Getiri</th><th>Ağ.</th></tr></thead>
-    <tbody>${rows}</tbody></table>`;
+    <tbody>${rows}${cashRow}</tbody></table>`;
 }
 
 const SIG_LABEL = { NEXT_BUY: "Yarın Al", STRONG_BUY: "Güçlü Al", NEAR: "2/3 Yakın", SCORE_ONLY: "Sadece Skor" };
@@ -121,14 +150,14 @@ function _robotCard(r, byTicker) {
   return `<div class="rb-card">
     <div class="rb-card-head">
       <div class="rb-name" data-robot="${escAttr(r.key)}" title="Detay">${escHTML(r.name || r.key)} <span class="rb-detay">▸</span></div>
-      <div class="rb-stats">${_statChips(r.stats)}</div>
+      <div class="rb-stats">${_statChips(r.stats)}${_periodChips(r.equity)}</div>
       ${r.equity ? `<canvas class="rb-eq" id="rb-eq-${escAttr(r.key)}" width="120" height="30"></canvas>` : ""}
       <button class="rb-pin" data-pin-robot="${escAttr(r.key)}" ${(nH + nC) ? "" : "disabled"}>📌 Sektörleri sabitle</button>
     </div>
     <div class="rb-cols">
       <div class="rb-col">
         <div class="rb-col-h">Tutuyor <span class="rb-n">${nH}</span></div>
-        ${_holdingsTable(r.holdings, byTicker)}
+        ${_holdingsTable(r.holdings, byTicker, r.stats && r.stats.cash_pct)}
       </div>
       <div class="rb-col">
         <div class="rb-col-h rb-col-h-cand">Sıradaki Adaylar <span class="rb-n">${nC}</span></div>
@@ -154,7 +183,7 @@ function renderRobotsView(robotsData, stocks) {
 
   robots.forEach(r => {
     const c = document.getElementById(`rb-eq-${r.key}`);
-    if (c && r.equity) _drawSparkline(c, r.equity);
+    if (c && r.equity) _drawSparkline(c, r.equity.map(p => p.value));
   });
   el.querySelectorAll("tr[data-ticker]").forEach(row =>
     row.addEventListener("click", () => {

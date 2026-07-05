@@ -648,10 +648,10 @@ def _simulate(rcfg, by_date, panel, gp, dates) -> dict:
         equity.append({"date": d.strftime("%Y-%m-%d"),
                        "value": round(_mtm(cash, positions, closes, last_px), 6)})
 
-    return _finalize(rcfg, positions, trades, equity, rebal, dates[-1], last_closes, last_px)
+    return _finalize(rcfg, cash, positions, trades, equity, rebal, dates[-1], last_closes, last_px)
 
 
-def _finalize(rcfg, positions, trades, equity, rebal, last_date, last_closes, last_px=None) -> dict:
+def _finalize(rcfg, cash, positions, trades, equity, rebal, last_date, last_closes, last_px=None) -> dict:
     key, name = rcfg[0], rcfg[1]
     last_px = last_px or {}
     e0 = equity[0]["value"] if equity else 1.0
@@ -668,11 +668,14 @@ def _finalize(rcfg, positions, trades, equity, rebal, last_date, last_closes, la
             v = last_px.get(t, np.nan)
         return v if pd.notna(v) else p["entry_price"]
 
-    final_val = sum(p["shares"] * _last(t, p) for t, p in positions.items()) or 1.0
+    stock_val = sum(p["shares"] * _last(t, p) for t, p in positions.items())
+    # Weight the whole portfolio (stocks + cash), not just the stock sleeve, so
+    # holdings weights + cash_pct sum to 100% and a cash-heavy robot shows it.
+    total_val = (cash + stock_val) or 1.0
     holdings = []
     for t, p in positions.items():
         px = _last(t, p)
-        holdings.append({"ticker": t, "weight": round(p["shares"] * px / final_val, 2),
+        holdings.append({"ticker": t, "weight": round(p["shares"] * px / total_val, 2),
                          "entry_date": p["entry_date"].strftime("%Y-%m-%d"),
                          "entry_price": round(float(p["entry_price"]), 2),
                          "price": round(float(px), 2),
@@ -693,8 +696,12 @@ def _finalize(rcfg, positions, trades, equity, rebal, last_date, last_closes, la
         "cagr": round(((vals[-1] / vals[0]) ** (252 / len(vals)) - 1) * 100, 1) if len(vals) > 5 else 0.0,
         "max_dd": round((vals / peak - 1).min() * 100, 1),
         "sharpe": round(rets.mean() / rets.std() * np.sqrt(252), 2) if rets.std() > 1e-9 else 0.0,
+        # win_rate's denominator is CLOSED trades only (an open position has no
+        # realized win/loss yet) — n_trades now counts the same set, so the two
+        # card chips are no longer computed over mismatched trade sets.
         "win_rate": round(100 * np.mean([t["return_pct"] > 0 for t in closed])) if closed else 0,
-        "n_trades": len(trades),
+        "n_trades": len(closed),
+        "cash_pct": round(cash / total_val * 100, 1),
     }
     return {"name": name, "key": key, "inception": eq[0]["date"] if eq else None,
             "stats": stats, "equity": eq, "holdings": holdings, "trades": trades,

@@ -3,6 +3,37 @@
 All notable changes to this project are recorded here
 Format follows [Keep a Changelog](https://keepachangelog.com/); versions use [SemVer](https://semver.org/).
 
+## [0.11.5] — 2026-07-06
+
+### Fixed
+- **Robot-card equity sparkline never rendered.** `robots.js` passed the raw
+  `[{date, value}]` equity array into `_drawSparkline`, which calls `Math.min(...values)`
+  on the objects — NaN coordinates, blank canvas on every card. Now maps to
+  `r.equity.map(p => p.value)` first.
+- **Holdings weight excluded cash, so a cash-heavy robot looked fully invested.**
+  `_finalize` weighted each position against the stock sleeve only; a robot 60% in cash
+  showed holdings summing to 100% with the cash stance invisible. Now weighted against the
+  whole portfolio (stocks + cash) and a new `stats.cash_pct` field is added, so holdings +
+  cash sum to ~100% (verified across all 7 robots). Surfaced immediately: A is currently
+  ~66% cash and AV ~78% cash — previously invisible.
+- **`n_trades` counted open positions while `win_rate` didn't**, so the two card chips were
+  computed over mismatched trade sets. `n_trades` now counts closed trades only, matching
+  `win_rate`'s denominator (open positions remain visible via the holdings count).
+
+### Removed
+- **Dead "Poz." (exposure) tile** in the robot tearsheet — `_finalize` never computed
+  `stats.exposure`, so it permanently showed "—". Replaced with a working **"Nakit"** tile
+  backed by the new `cash_pct`, plus a cash row appended to the holdings table (card +
+  modal) so the table visually sums to 100%.
+- **Nasdaq 100 benchmark legend/line** — advertised in the tearsheet but `robots.py` only
+  ever emitted `benchmarks.sp500`; removed the dead `bm.ndx` line, legend entry, and
+  docstring mention rather than build out an unused second benchmark series.
+
+### Added
+- **Weekly / monthly / YTD return** on both the Robots page card and the tearsheet modal,
+  computed client-side from the existing equity curve (last 5 / 21 trading days, and
+  since Jan 1) — no new backend field needed.
+
 ## [0.11.4] — 2026-07-05
 
 ### Changed
