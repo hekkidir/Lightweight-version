@@ -192,7 +192,8 @@ def compute_full_panel(prices: pd.DataFrame, cfg: Config, gmap: dict) -> pd.Data
 def gics_panel(prices: pd.DataFrame, gmap: dict, spy: pd.DataFrame) -> pd.DataFrame:
     """Per-(sector,date) GICS rotation, ported from backtest/03_compute_sectors.py:
     equal-weight sector return, excess vs SPY, X=cum_excess_252, Y=cum_excess_20,
-    strength=(0.5·rank(X)+0.5·rank(Y))·5 (per-sector temporal rank), ΔY=Y.diff(5)."""
+    strength=(0.5·rank(X)+0.5·rank(Y))·5 (per-sector point-in-time expanding rank),
+    ΔY=Y.diff(5)."""
     df = prices.copy()
     df["Sector"] = df["Ticker"].map(gmap)
     df = df[df["Sector"].notna() & (df["Sector"] != "Unknown")].sort_values(["Ticker", "Date"])
@@ -208,7 +209,13 @@ def gics_panel(prices: pd.DataFrame, gmap: dict, spy: pd.DataFrame) -> pd.DataFr
         g = g.copy()
         x = g["excess"].rolling(252, min_periods=60).sum() * 100
         y = g["excess"].rolling(20, min_periods=10).sum() * 100
-        g["strength_score"] = (0.5 * x.rank(pct=True) + 0.5 * y.rank(pct=True)) * 5
+        # Point-in-time rank: rank today's cum-excess only among values up to today,
+        # not the sector's full (future-inclusive) history. Fixes look-ahead bias
+        # (report F1). On the last bar this equals the full-history rank, so live
+        # signals are unchanged; only simulated history is corrected.
+        xr = x.expanding(min_periods=1).rank(pct=True)
+        yr = y.expanding(min_periods=1).rank(pct=True)
+        g["strength_score"] = (0.5 * xr + 0.5 * yr) * 5
         g["delta_Y"] = y.diff(5)
         g["quadrant"] = np.select(
             [(x >= 0) & (y >= 0), (x < 0) & (y > 0), (x < 0) & (y <= 0)],
