@@ -29,6 +29,11 @@ LIQ_MIN_DV  = _cfg.robots.liq_min_dv
 LIQ_MIN_SB  = _cfg.robots.liq_min_sb
 DV_AVG_WIN  = _cfg.robots.dv_avg_win
 SCORE_FLOOR = _cfg.robots.score_floor
+# Per-robot SB overrides. B-GATE-W3 is tuned separately from D (backtest_lab sweep):
+# a $20M liquidity floor is the U-shape optimum (both $50M and no-floor are worse) and a
+# 3.0 score floor lifts return; D keeps LIQ_MIN_SB / SCORE_FLOOR. See backtest_lab/results/LEARNINGS.md.
+LIQ_MIN_SB_BY_KEY  = {"B-GATE-W3": _cfg.robots.liq_min_sb_b}
+SCORE_FLOOR_BY_KEY = {"B-GATE-W3": _cfg.robots.score_floor_b}
 GUCLEN_QW = {"STRONG": 1.9, "WARMING": 1.6, "COOLING": 1.1, "WEAK": 1.0}
 # Execution model. Defaults = the user's: free brokerage + same-bar (signal-day
 # close) fills. Set COST_PER_SIDE=0.0015 + NEXT_OPEN_FILL=True to reproduce the
@@ -74,7 +79,7 @@ ROBOTS = [
     ("A",             "Strategy A — SA-DEF",                      "sa", 5, None, "C2",  "E1+E51+E56"),
     ("A-G-W3",        "A-G-W3 — SA-DEF, 3-day vol gate",         "sa", 5, None, "C2",  "E1+E51+E56"),
     ("A-SCORE-CLUST", "A-SCORE-CLUST — SA-DEF, cluster score",   "sa", 5, None, "C2",  "E1+E51+E56"),
-    ("B-GATE-W3",     "Strategy B — B-GATE-W3",                   "sb", 3, None, "C8a", "E1+E24+E33+EVP"),
+    ("B-GATE-W3",     "Strategy B — B-GATE-W3",                   "sb", 3, None, "C8-1.5", "E1+E24+E33+EVP"),
     ("C",             "Volume C — SV-A7 +10% floor",              "sv", 5, "A7", "C8a", "E1+E24+E33+E20"),
     ("D",             "Volume D — SB-HYB-G5-replace",             "sb", 6, "G5", "C8a", "E1+E24+E33"),
     ("AV",            "AV — SA-HYB-G6",                           "sa", 5, "G6", "C2",  "E1+E51+E56"),
@@ -82,14 +87,16 @@ ROBOTS = [
 
 
 def _size(cands: pd.DataFrame, variant: str) -> pd.Series:
-    """Position weights (C-axis). C2 = score-weighted; C8a = steep pyramid (1/rank)."""
+    """Position weights (C-axis). C2 = score-weighted; C8a = steep pyramid (1/rank^1.0);
+    C8-1.5 = steeper pyramid (1/rank^1.5), B's tuned sizing (backtest_lab sweep)."""
     n = len(cands)
     if n == 0:
         return pd.Series(dtype=float)
     if variant == "C2":
         s = cands["score"].clip(lower=0)
         return s / s.sum() if s.sum() > 0 else pd.Series(1.0 / n, index=cands.index)
-    raw = 1.0 / np.arange(1, n + 1, dtype=float)        # C8a: cands already score-desc
+    exp = 1.5 if variant == "C8-1.5" else 1.0           # C8a default; cands are score-desc
+    raw = 1.0 / np.arange(1, n + 1, dtype=float) ** exp
     return pd.Series(raw / raw.sum(), index=cands.index)
 
 
@@ -369,9 +376,11 @@ def _candidates_for(key, kind, vscreen, ft, n=15):
         return sub.nlargest(n, "score")
 
     # sb (B, D) — dashboard score, hard H4 gate (unless a recipe replaces it).
-    # Liquidity floor: $30M over 7-day-avg dollar volume (SA/SV enforce single-day
-    # LIQ_MIN_DV; the SB path previously had no floor, so B/D could buy $1-3M names).
-    mask = _sw_gate(ft, vc_col=vc) & ft[vc] & (ft["dollar_vol_avg7"] >= LIQ_MIN_SB)
+    # Liquidity floor on 7-day-avg dollar volume (SA/SV enforce single-day LIQ_MIN_DV; the
+    # SB path previously had no floor, so B/D could buy $1-3M names). B uses a tuned $20M
+    # floor (its U-shape optimum); D uses LIQ_MIN_SB.
+    liq_floor = LIQ_MIN_SB_BY_KEY.get(key, LIQ_MIN_SB)
+    mask = _sw_gate(ft, vc_col=vc) & ft[vc] & (ft["dollar_vol_avg7"] >= liq_floor)
     if key not in VSCREEN_REPLACE:
         mask = mask & (ft["ret_1m_rank"] >= 0.9) & (ft["ret_3m_rank"] >= 0.9) & (ft["ret_6m_rank"] >= 0.9)
     if vscreen:
@@ -383,7 +392,7 @@ def _candidates_for(key, kind, vscreen, ft, n=15):
     if sub.empty:
         return sub
     sub["score"] = _dashboard(sub, graded=True)
-    sub = sub[sub["score"] >= SCORE_FLOOR]
+    sub = sub[sub["score"] >= SCORE_FLOOR_BY_KEY.get(key, SCORE_FLOOR)]
     if sub.empty:
         return sub
     tilt = SECTOR_TILT.get(key)
