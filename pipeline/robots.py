@@ -17,10 +17,18 @@ import numpy as np
 import pandas as pd
 
 from pipeline import indicators
-from pipeline.config import Config
+from pipeline.config import Config, cfg as _cfg
 
-LIQ_MIN_DV = 50e6
-SCORE_FLOOR = 2.39
+# Robot liquidity + score knobs — sourced from config.ini [robots] (see config.py).
+#   LIQ_MIN_DV  = SA/SV floor on single-day dollar volume.
+#   LIQ_MIN_SB  = SB (B, D) floor on the DV_AVG_WIN-day AVERAGE dollar volume. This
+#                 is a fast-rotation strategy (~7-day median hold), so the tradeable-
+#                 liquidity measure is the average over the hold horizon, not a single
+#                 (spike-prone) day. The SB path previously had no floor at all.
+LIQ_MIN_DV  = _cfg.robots.liq_min_dv
+LIQ_MIN_SB  = _cfg.robots.liq_min_sb
+DV_AVG_WIN  = _cfg.robots.dv_avg_win
+SCORE_FLOOR = _cfg.robots.score_floor
 GUCLEN_QW = {"STRONG": 1.9, "WARMING": 1.6, "COOLING": 1.1, "WEAK": 1.0}
 # Execution model. Defaults = the user's: free brokerage + same-bar (signal-day
 # close) fills. Set COST_PER_SIDE=0.0015 + NEXT_OPEN_FILL=True to reproduce the
@@ -186,6 +194,11 @@ def compute_full_panel(prices: pd.DataFrame, cfg: Config, gmap: dict) -> pd.Data
     panel["stage"] = _robot_stages(panel, cfg)
     panel["prev_stage"] = panel.groupby("Ticker")["stage"].shift(1).fillna("Chop")
     panel["GICS"] = panel["Ticker"].map(gmap)
+    # 7-trading-day average dollar volume — the SB-path liquidity-floor basis
+    # (LIQ_MIN_SB). Sorted so the per-ticker rolling window is date-ordered.
+    panel = panel.sort_values(["Ticker", "Date"])
+    panel["dollar_vol_avg7"] = panel.groupby("Ticker")["dollar_vol"].transform(
+        lambda s: s.rolling(DV_AVG_WIN, min_periods=1).mean())
     return panel
 
 
@@ -355,8 +368,10 @@ def _candidates_for(key, kind, vscreen, ft, n=15):
         sub["reason"] = "z-skor " + sub["score"].round(2).astype(str) + " + sektör"
         return sub.nlargest(n, "score")
 
-    # sb (B, D) — dashboard score, hard H4 gate (unless a recipe replaces it)
-    mask = _sw_gate(ft, vc_col=vc) & ft[vc]
+    # sb (B, D) — dashboard score, hard H4 gate (unless a recipe replaces it).
+    # Liquidity floor: $30M over 7-day-avg dollar volume (SA/SV enforce single-day
+    # LIQ_MIN_DV; the SB path previously had no floor, so B/D could buy $1-3M names).
+    mask = _sw_gate(ft, vc_col=vc) & ft[vc] & (ft["dollar_vol_avg7"] >= LIQ_MIN_SB)
     if key not in VSCREEN_REPLACE:
         mask = mask & (ft["ret_1m_rank"] >= 0.9) & (ft["ret_3m_rank"] >= 0.9) & (ft["ret_6m_rank"] >= 0.9)
     if vscreen:
@@ -485,14 +500,28 @@ def _mtm(cash, positions, closes, last_px=None):
 
 def _simulate(rcfg, by_date, panel, gp, dates) -> dict:
     """Faithful port of engine.run_backtest for the 5 robots: decide on today's
-    close, FILL AT NEXT-DAY OPEN (T+1) with costs; weekly Monday rebalance with
-    Phase-A trim (skipped for let-winners-run) + Phase-B cash-capped buys."""
+    close, FILL AT NEXT-DAY OPEN (T+1) with costs; weekly rebalance (first trading
+    day of the ISO week) with Phase-A trim (skipped for let-winners-run) + Phase-B
+    cash-capped buys."""
     key, name, kind, d_n, vscreen, sizing, exit_str = rcfg
     skip_trim = key in SKIP_TRIM
     next_open = NEXT_OPEN_FILL or key in NEXT_OPEN_KEYS   # per-robot T+1 fill
     cash, positions, equity, trades, rebal = 1.0, {}, [], [], None
     last_closes = pd.Series(dtype=float)
     last_px: dict = {}        # ticker -> last known close, for holding through data gaps
+
+    # Holiday-aware rebalance day set: the FIRST trading day of each ISO week,
+    # from the full trading calendar (by_date spans all history, not just this
+    # sim window). A literal `d.weekday() == 0` check misses weeks whose Monday
+    # is an NYSE holiday (~7/yr) entirely; this shifts that week's rotation to
+    # the next trading day (e.g. Tuesday after MLK) instead of skipping it.
+    all_days = sorted(by_date)
+    week_start = set()
+    if all_days:
+        week_start.add(all_days[0])
+        for i in range(1, len(all_days)):
+            if all_days[i].isocalendar()[:2] != all_days[i - 1].isocalendar()[:2]:
+                week_start.add(all_days[i])
 
     def _fill(t, ndf, closes, fallback):
         if next_open and ndf is not None and t in ndf.index:
@@ -546,8 +575,8 @@ def _simulate(rcfg, by_date, panel, gp, dates) -> dict:
             _close_trade(trades, t, positions[t], fdate, fp, reason)
             del positions[t]
 
-        # 2. Weekly (Monday) rebalance.
-        if d.weekday() == 0:
+        # 2. Weekly rebalance on the first trading day of the ISO week.
+        if d in week_start:
             ft = _ft_for_day(panel, gp, d)
             cands = _candidates_for(key, kind, vscreen, ft, n=d_n)
             if len(cands):

@@ -66,11 +66,20 @@ class RotationConfig:
 
 
 @dataclass
+class RobotsConfig:
+    liq_min_dv:  float   # SA/SV single-day dollar-volume floor ($)
+    liq_min_sb:  float   # SB (B, D) floor on the dv_avg_win-day avg dollar volume ($)
+    dv_avg_win:  int     # trading-day window for the SB avg-dollar-volume floor
+    score_floor: float   # minimum SB dashboard score to qualify
+
+
+@dataclass
 class Config:
     data:     DataConfig
     stages:   StageConfig
     download: DownloadConfig
     rotation: RotationConfig
+    robots:   RobotsConfig
 
 
 def load(path: Path = CONFIG_FILE) -> Config:
@@ -122,6 +131,12 @@ def load(path: Path = CONFIG_FILE) -> Config:
             min_tickers_cohesion = get("rotation", "min_tickers_cohesion", int,   12),
             ema_smooth           = get("rotation", "ema_smooth",           int,     3),
             benchmark_weighting  = get("rotation", "benchmark_weighting",  str, "equal"),
+        ),
+        robots=RobotsConfig(
+            liq_min_dv  = get("robots", "liq_min_dv",  float, 50e6),
+            liq_min_sb  = get("robots", "liq_min_sb",  float, 30e6),
+            dv_avg_win  = get("robots", "dv_avg_win",  int,     7),
+            score_floor = get("robots", "score_floor", float, 2.39),
         ),
     )
 
