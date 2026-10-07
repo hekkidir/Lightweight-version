@@ -156,7 +156,8 @@ def add_vp_val(df: pd.DataFrame, lookback: int = 90, nbins: int = 40,
     """Return df + a `vp_val` column (rolling volume-by-price value-area-low).
     `since` (a Date) limits computation to bars on/after that date (prior bars are
     still used for each window) so the sim window can skip pre-period work."""
-    src = df.sort_values(["Ticker", "Date"])
+    # Sort only the columns used here — sorting the full panel copies every column.
+    src = df[["Ticker", "Date", "Close", "Volume"]].sort_values(["Ticker", "Date"])
     dates = src["Date"].to_numpy()
     close = src["Close"].to_numpy(dtype=float)
     vol   = src["Volume"].to_numpy(dtype=float)
@@ -178,9 +179,8 @@ def add_vp_val(df: pd.DataFrame, lookback: int = 90, nbins: int = 40,
             out[pos + i] = _value_area_low(cw[ok], vw[ok], nbins, va_pct)
         pos += m
     vp = pd.Series(out, index=src.index)
-    result = df.copy()
-    result["vp_val"] = vp.reindex(df.index)
-    return result
+    # assign() under pandas 3 copy-on-write adds the column without deep-copying df.
+    return df.assign(vp_val=vp.reindex(df.index))
 
 
 # ── Stage classifier (vectorized, two-axis stair-step) ────────────────────────
