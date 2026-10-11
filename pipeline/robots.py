@@ -34,9 +34,17 @@ SCORE_FLOOR = _cfg.robots.score_floor
 # 3.0 score floor lifts return; D keeps LIQ_MIN_SB / SCORE_FLOOR. See backtest_lab/results/LEARNINGS.md.
 LIQ_MIN_SB_BY_KEY  = {"B-GATE-W3": _cfg.robots.liq_min_sb_b}
 SCORE_FLOOR_BY_KEY = {"B-GATE-W3": _cfg.robots.score_floor_b}
-# Per-robot GICS-rotation position window. B-GATE-W3 beat the shorter default in
-# BOTH halves of the split-half validation, so it keeps the longer 252-day window.
-ROT_X_BY_KEY = {"B-GATE-W3": _cfg.robots.rot_x_window_b}
+# Per-robot GICS-rotation overrides.
+#   ROT_X_BY_KEY    — position window (default cfg.robots.rot_x_window).
+#   ROT_BENCH_BY_KEY— rotation benchmark ("spy" default, or "univ").
+# B-GATE-W3 runs on the universe-internal benchmark at the default 126 window:
+# split-half validated, it beat SPY-252/20 on return (x1.94), Sharpe (1.66 vs
+# 1.49) AND drawdown (-44% vs -60%), winning BOTH halves and 4 of 5 years. It
+# therefore no longer needs the longer X window, which it only preferred under
+# SPY. The same test REJECTED univ for A-SCORE-CLUST: all 9 univ window combos
+# lost the second half, so that robot stays on spy.
+ROT_X_BY_KEY: dict[str, int] = {}
+ROT_BENCH_BY_KEY = {"B-GATE-W3": _cfg.robots.rot_bench_b}
 GUCLEN_QW = {"STRONG": 1.9, "WARMING": 1.6, "COOLING": 1.1, "WEAK": 1.0}
 # Execution model. Defaults = the user's: free brokerage + same-bar (signal-day
 # close) fills. Set COST_PER_SIDE=0.0015 + NEXT_OPEN_FILL=True to reproduce the
@@ -213,11 +221,18 @@ def compute_full_panel(prices: pd.DataFrame, cfg: Config, gmap: dict) -> pd.Data
 
 
 def gics_panel(prices: pd.DataFrame, gmap: dict, spy: pd.DataFrame,
-               x_window: int | None = None, y_window: int | None = None) -> pd.DataFrame:
+               x_window: int | None = None, y_window: int | None = None,
+               benchmark: str = "spy") -> pd.DataFrame:
     """Per-(sector,date) GICS rotation, ported from backtest/03_compute_sectors.py:
-    equal-weight sector return, excess vs SPY, X=cum_excess_<x_window>,
+    equal-weight sector return, excess vs benchmark, X=cum_excess_<x_window>,
     Y=cum_excess_<y_window>, strength=(0.5·rank(X)+0.5·rank(Y))·5 (per-sector
     point-in-time expanding rank), ΔY=Y.diff(5).
+
+    benchmark="spy"  — excess vs the SPY ETF (cap-weighted; the backtest default).
+    benchmark="univ" — excess vs the equal-weight mean of the universe's own
+        sectors, matching rotation.py / FORMULAS.md. Needs no external file, so it
+        cannot go stale; measures equal-weight sectors against an equal-weight
+        peer rather than a cap-weighted index. Per-robot via ROT_BENCH_BY_KEY.
 
     Windows default to cfg.robots.rot_x/y_window; callers pass an override for a
     robot that wants a different position window (see ROT_X_BY_KEY).
@@ -232,11 +247,15 @@ def gics_panel(prices: pd.DataFrame, gmap: dict, spy: pd.DataFrame,
     df = df[df["Sector"].notna() & (df["Sector"] != "Unknown")].sort_values(["Ticker", "Date"])
     df["ret"] = df.groupby("Ticker")["Close"].pct_change()
     agg = df.groupby(["Sector", "Date"], as_index=False)["ret"].mean().rename(columns={"ret": "daily_ret"})
-    spy = spy.copy()
-    spy["Date"] = pd.to_datetime(spy["Date"])
-    spy["spy_ret"] = spy["Close"].pct_change()
-    agg = agg.merge(spy[["Date", "spy_ret"]], on="Date", how="left")
-    agg["excess"] = agg["daily_ret"] - agg["spy_ret"]
+    if benchmark == "univ":
+        bench = agg.groupby("Date")["daily_ret"].mean().rename("bench_ret")
+        agg = agg.merge(bench, on="Date", how="left")
+    else:
+        spy = spy.copy()
+        spy["Date"] = pd.to_datetime(spy["Date"])
+        spy["bench_ret"] = spy["Close"].pct_change()
+        agg = agg.merge(spy[["Date", "bench_ret"]], on="Date", how="left")
+    agg["excess"] = agg["daily_ret"] - agg["bench_ret"]
     xw = x_window or _cfg.robots.rot_x_window
     yw = y_window or _cfg.robots.rot_y_window
     x_mp, y_mp = max(20, xw // 4), max(3, yw // 2)      # scale warm-up with the window
@@ -743,10 +762,16 @@ def build_robots(cfg: Config, data_dir: Path, lookback_days: int = 504) -> dict:
     spy_s = spy.set_index(pd.to_datetime(spy["Date"]))["Close"]
 
     panel = compute_full_panel(prices, cfg, gmap)
-    # One rotation panel per DISTINCT position window (most robots share the
-    # default; B-GATE-W3 uses its own) — built once each, not once per robot.
-    gp_by_x = {x: gics_panel(prices, gmap, spy, x_window=x)
-               for x in {cfg.robots.rot_x_window, *ROT_X_BY_KEY.values()}}
+
+    def _rot_key(key: str) -> tuple[str, int]:
+        """(benchmark, position window) this robot's rotation is computed on."""
+        return (ROT_BENCH_BY_KEY.get(key, "spy"),
+                ROT_X_BY_KEY.get(key, cfg.robots.rot_x_window))
+
+    # One rotation panel per DISTINCT (benchmark, window) pair — built once each,
+    # not once per robot. Most robots share the default; B-GATE-W3 uses "univ".
+    gp_by_key = {k: gics_panel(prices, gmap, spy, x_window=k[1], benchmark=k[0])
+                 for k in {_rot_key(r[0]) for r in ROBOTS}}
     all_dates = sorted(panel["Date"].unique())
     end = _last_settled_date(prices)                          # last non-synthetic bar
     sim_dates = [d for d in all_dates[252:] if d <= end][-lookback_days:]
@@ -755,7 +780,7 @@ def build_robots(cfg: Config, data_dir: Path, lookback_days: int = 504) -> dict:
     if sim_dates and any("EVP" in r[6] for r in ROBOTS):
         panel = indicators.add_vp_val(panel, since=sim_dates[0])
     by_date = {d: g.set_index("Ticker") for d, g in panel.groupby("Date")}
-    today_by_x = {x: _ft_for_day(panel, g, end) for x, g in gp_by_x.items()}
+    today_by_key = {k: _ft_for_day(panel, g, end) for k, g in gp_by_key.items()}
     # A T+1 robot whose last settled bar is a Monday has just rebalanced and will
     # buy its top-d_n picks at the NEXT open — flag those candidates so the UI can
     # mark "yarin acilista alinacak" (to be bought at tomorrow's open).
@@ -763,12 +788,12 @@ def build_robots(cfg: Config, data_dir: Path, lookback_days: int = 504) -> dict:
 
     robots = []
     for rcfg in ROBOTS:
-        rx = ROT_X_BY_KEY.get(rcfg[0], cfg.robots.rot_x_window)
-        out = _simulate(rcfg, by_date, panel, gp_by_x[rx], sim_dates)
+        rk = _rot_key(rcfg[0])
+        out = _simulate(rcfg, by_date, panel, gp_by_key[rk], sim_dates)
         is_t1 = rcfg[0] in NEXT_OPEN_KEYS or NEXT_OPEN_FILL
         pending = monday_close and is_t1
         out["next_open_pending"] = bool(pending)
-        out["candidates"] = _signal_candidates(rcfg, today_by_x[rx], pending, n_show=12)
+        out["candidates"] = _signal_candidates(rcfg, today_by_key[rk], pending, n_show=12)
         out["benchmarks"] = {"sp500": _rebase(spy_s, [e["date"] for e in out["equity"]])}
         robots.append(out)
     return {"generated_at": datetime.now().isoformat(timespec="seconds"), "robots": robots}

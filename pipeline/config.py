@@ -75,7 +75,7 @@ class RobotsConfig:
     score_floor_b: float   # B-GATE-W3 score-floor override
     rot_x_window:   int    # GICS-rotation long-term (position) window, trading days
     rot_y_window:   int    # GICS-rotation recent (momentum) window, trading days
-    rot_x_window_b: int    # B-GATE-W3 override for the position window
+    rot_bench_b:   str     # B-GATE-W3 rotation benchmark: "spy" or "univ"
     benchmark_max_lag_days: int   # max days spy.parquet may lag prices before check() fails
 
 
@@ -147,7 +147,7 @@ def load(path: Path = CONFIG_FILE) -> Config:
             score_floor_b = get("robots", "score_floor_b", float,  3.0),
             rot_x_window   = get("robots", "rot_x_window",   int, 126),
             rot_y_window   = get("robots", "rot_y_window",   int,  20),
-            rot_x_window_b = get("robots", "rot_x_window_b", int, 252),
+            rot_bench_b    = get("robots", "rot_bench_b",    str, "univ"),
             benchmark_max_lag_days = get("robots", "benchmark_max_lag_days", int, 7),
         ),
     )

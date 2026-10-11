@@ -3,6 +3,27 @@
 All notable changes to this project are recorded here
 Format follows [Keep a Changelog](https://keepachangelog.com/); versions use [SemVer](https://semver.org/).
 
+## [0.13.0] — 2026-10-11
+
+### Changed
+- **B-GATE-W3 now rotates on the universe-internal benchmark** ("univ" — the
+  equal-weight mean of the universe's own GICS sectors, as `rotation.py` and
+  `FORMULAS.md` already use) instead of SPY, at the default 126-day window.
+  Split-half validated: return **6579% -> 12763% (x1.94)**, Sharpe **1.49 ->
+  1.66**, max drawdown **-59.9% -> -44.1%** — better on all three at once,
+  winning BOTH halves and 4 of 5 calendar years. It consequently no longer needs
+  the longer X window it preferred only under SPY, so `ROT_X_BY_KEY` is now
+  empty and `rot_x_window_b` is replaced by `rot_bench_b`.
+- `gics_panel()` takes a `benchmark` argument ("spy" | "univ"); `build_robots`
+  keys its rotation panels by *(benchmark, window)* and builds one per distinct
+  pair. Every other robot is byte-identical — verified after the change.
+
+### Notes
+- **Rejected for A-SCORE-CLUST.** Its headline univ numbers were the largest in
+  the whole sweep (up to 18395%), but all 9 univ window combos **lost the second
+  half** — the edge lived entirely in 2022-2024. It stays on spy/126/20. A
+  reminder that the split-half check, not the total, is what decides.
+
 ## [0.12.0] — 2026-10-11
 
 ### Fixed
