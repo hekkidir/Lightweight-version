@@ -340,6 +340,69 @@ def fetch_live_snapshot(tickers: list[str]) -> dict:
     return prices
 
 
+# ── Benchmark (SPY) ────────────────────────────────────────────────────────────
+
+def refresh_benchmark(data_dir: Path, cfg: Config) -> None:
+    """Keep data/spy.parquet current. SPY is the robots' rotation benchmark but is
+    NOT in tickers.csv, so nothing used to refresh it: the file silently went
+    stale, every sector's 20-day excess became NaN, and gics_panel marked the
+    whole universe COOLING -- the robots stopped buying for months with no error.
+    Fetched incrementally here on every run so that cannot recur."""
+    spy_file = data_dir / "spy.parquet"
+    cols = ["Date", "Close", "High", "Low", "Open", "Volume"]
+
+    old = pd.DataFrame()
+    if spy_file.exists():
+        try:
+            old = pd.read_parquet(spy_file)
+            old["Date"] = pd.to_datetime(old["Date"])
+            old = old.dropna(subset=["Close"])
+        except Exception:
+            old = pd.DataFrame()
+
+    target = latest_published_bar()
+    last = old["Date"].max().date() if not old.empty else None
+    if last is not None and last >= target:
+        print(f"[download] Benchmark SPY up to date ({last}).")
+        return
+
+    # Re-fetch a short overlap so a revised/adjusted bar is corrected, not duplicated.
+    # Cold start: cover the FULL price history, not just history_years -- prices
+    # may be backfilled further back, and a benchmark shorter than the panel
+    # leaves the early sim window with no excess to measure.
+    if last:
+        start = last - timedelta(days=7)
+    else:
+        start = date.today() - timedelta(days=365 * cfg.data.history_years)
+        pf = data_dir / "prices.parquet"
+        if pf.exists():
+            try:
+                first = pd.to_datetime(pd.read_parquet(pf, columns=["Date"])["Date"]).min()
+                start = min(start, first.date())
+            except (ValueError, KeyError):
+                pass
+    print(f"[download] Benchmark SPY: fetching from {start}...")
+    try:
+        raw = yf.download("SPY", start=start.strftime("%Y-%m-%d"), progress=False,
+                          timeout=30, auto_adjust=True)
+    except Exception as e:
+        print(f"[download] SPY fetch failed ({str(e)[:60]}) - keeping existing file.")
+        return
+    if raw is None or raw.empty:
+        print("[download] SPY fetch returned no rows - keeping existing file.")
+        return
+    if isinstance(raw.columns, pd.MultiIndex):
+        raw.columns = raw.columns.get_level_values(0)
+    new = raw.reset_index()
+    new["Date"] = pd.to_datetime(new["Date"]).dt.tz_localize(None)
+    new = new[[c for c in cols if c in new.columns]].dropna(subset=["Close"])
+
+    merged = (pd.concat([old[~old["Date"].isin(new["Date"])], new], ignore_index=True)
+                .sort_values("Date").reset_index(drop=True)) if not old.empty else new
+    merged.to_parquet(spy_file, index=False)
+    print(f"[download] Benchmark SPY: {len(merged)} rows -> {merged['Date'].max().date()}")
+
+
 # ── Main entry ─────────────────────────────────────────────────────────────────
 
 def run(cfg: Config, data_dir: Path) -> None:
@@ -351,6 +414,8 @@ def run(cfg: Config, data_dir: Path) -> None:
     ticker_sector = dict(zip(ticker_df["Ticker"], ticker_df["Industry"]))
     all_tickers   = sorted(ticker_df["Ticker"].dropna().unique())
     print(f"[download] {len(all_tickers)} tickers loaded")
+
+    refresh_benchmark(data_dir, cfg)
 
     mcap = refresh_mcap(all_tickers, mcap_file, cfg)
 

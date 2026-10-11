@@ -3,6 +3,41 @@
 All notable changes to this project are recorded here
 Format follows [Keep a Changelog](https://keepachangelog.com/); versions use [SemVer](https://semver.org/).
 
+## [0.12.0] — 2026-10-11
+
+### Fixed
+- **Stale SPY benchmark silently paralysed 6 of 7 robots for ~3 months.**
+  `spy.parquet` is the robots' rotation benchmark but is not in `tickers.csv`, so
+  nothing ever refreshed it; it stopped at 2026-06-17 while prices ran to
+  2026-10-09. With no SPY data, every sector's 20-day excess became NaN — and
+  because every comparison against NaN is False, `np.select` fell through to its
+  **`COOLING` default**, stamping the entire universe COOLING. The
+  `STRONG`/`WARMING` gate then rejected everything, so the robots sat in 100%
+  cash with no error, no warning, and plausible-looking output. Three changes:
+  - `download.refresh_benchmark()` now fetches SPY incrementally on **every**
+    pipeline run (with a short re-fetch overlap so adjusted bars are corrected).
+  - An undefined quadrant is now **`UNKNOWN`**, never `COOLING` — a missing
+    benchmark can no longer masquerade as a real bearish signal.
+  - `health.check()` fails when `spy.parquet` lags `prices.parquet` by more than
+    `benchmark_max_lag_days`, so `run.py check` catches this class of outage.
+
+### Changed
+- **GICS rotation position window 252 -> 126 days.** A 27-config sweep
+  (3 benchmarks x 3 X-windows x 3 Y-windows, 7 robots each) with split-half
+  validation found X=126 beats X=252 on **5 of 6** sector-gated robots in **both**
+  halves, with a slightly better drawdown, on a stable plateau (not an isolated
+  peak). **B-GATE-W3 keeps X=252** via `ROT_X_BY_KEY` — it preferred the longer
+  window in both halves. Windows are now config knobs (`rot_x_window`,
+  `rot_y_window`, `rot_x_window_b`), and `build_robots` builds one rotation panel
+  per distinct window rather than one per robot.
+
+### Notes
+Also evaluated and **rejected** (all underperformed in the same sweep): the
+custom 79-industry list as the rotation grouping (bottom third; drawdowns to
+-85%), sqrt-market-cap sector weighting (bottom half), RSP as an equal-weight
+benchmark (11th of 37), and shorter momentum windows — Y=5 collapses Sharpe to
+~0.9, so Y=20 is retained.
+
 ## [0.11.5] — 2026-07-06
 
 ### Fixed

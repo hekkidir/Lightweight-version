@@ -78,6 +78,25 @@ def check(data_dir: Path) -> list[str]:
             problems.append(f"prices: {d} has {c} tickers "
                             f"(recent median {med}) -- partial download?")
 
+    # Benchmark freshness: spy.parquet drives the robots' GICS rotation. If it
+    # lags the price data, every sector's recent excess is NaN and the whole
+    # universe reads UNKNOWN/COOLING -- the robots silently stop buying. This is
+    # the check that would have caught that outage.
+    sp, pp2 = data_dir / "spy.parquet", data_dir / "prices.parquet"
+    if sp.exists() and pp2.exists():
+        try:
+            spy = pd.read_parquet(sp, columns=["Date", "Close"]).dropna(subset=["Close"])
+            spy_last = pd.to_datetime(spy["Date"]).max()
+            px_last = pd.to_datetime(pd.read_parquet(pp2, columns=["Date"])["Date"]).max()
+            lag = (px_last - spy_last).days
+            if lag > cfg.robots.benchmark_max_lag_days:
+                problems.append(
+                    f"spy.parquet: benchmark is {lag} days behind prices "
+                    f"(SPY {spy_last.date()} vs prices {px_last.date()}) -- "
+                    "robot sector rotation will be degraded")
+        except (ValueError, KeyError) as e:
+            problems.append(f"spy.parquet: unreadable ({e})")
+
     # metrics-specific: a broken classifier shows up as a degenerate distribution
     mp = data_dir / "metrics.parquet"
     if mp.exists():

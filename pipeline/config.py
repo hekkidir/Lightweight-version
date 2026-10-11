@@ -73,6 +73,10 @@ class RobotsConfig:
     score_floor:   float   # minimum SB dashboard score to qualify (D)
     liq_min_sb_b:  float   # B-GATE-W3 liquidity-floor override ($)
     score_floor_b: float   # B-GATE-W3 score-floor override
+    rot_x_window:   int    # GICS-rotation long-term (position) window, trading days
+    rot_y_window:   int    # GICS-rotation recent (momentum) window, trading days
+    rot_x_window_b: int    # B-GATE-W3 override for the position window
+    benchmark_max_lag_days: int   # max days spy.parquet may lag prices before check() fails
 
 
 @dataclass
@@ -141,6 +145,10 @@ def load(path: Path = CONFIG_FILE) -> Config:
             score_floor   = get("robots", "score_floor",   float, 2.39),
             liq_min_sb_b  = get("robots", "liq_min_sb_b",  float, 20e6),
             score_floor_b = get("robots", "score_floor_b", float,  3.0),
+            rot_x_window   = get("robots", "rot_x_window",   int, 126),
+            rot_y_window   = get("robots", "rot_y_window",   int,  20),
+            rot_x_window_b = get("robots", "rot_x_window_b", int, 252),
+            benchmark_max_lag_days = get("robots", "benchmark_max_lag_days", int, 7),
         ),
     )
 
