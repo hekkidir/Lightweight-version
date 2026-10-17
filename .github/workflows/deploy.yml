@@ -64,16 +64,22 @@ jobs:
             docker compose up -d --remove-orphans
             docker image prune -f
 
+            # Push auth via git's credential store, not a token embedded in the
+            # remote URL: git >= 2.5x drops URL credentials on the push POST.
+            REPO_URL=https://github.com/hekkidir/Lightweight-version.git
+            (umask 077; printf 'https://x-access-token:%s@github.com\n' "$GH_PAT" > ~/.git-credentials)
+
             # Clone repo (first time) or pull latest
             if [ ! -d /opt/stock-analysis/repo/.git ]; then
-              git clone https://$GH_PAT@github.com/hekkidir/Lightweight-version.git /opt/stock-analysis/repo
+              git clone $REPO_URL /opt/stock-analysis/repo
             else
               cd /opt/stock-analysis/repo
-              git remote set-url origin https://$GH_PAT@github.com/hekkidir/Lightweight-version.git
+              git remote set-url origin $REPO_URL
               git pull
             fi
 
             cd /opt/stock-analysis/repo
+            git config credential.helper store
             git config user.email "pipeline@screener"
             git config user.name "Screener Pipeline"
 
