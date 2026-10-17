@@ -3,7 +3,7 @@ services:
     image: serdardursun/stock-analysis:latest
     restart: unless-stopped
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8001:8000"   # localhost only; host :8000 is tw-screener's
     volumes:
       - /opt/stock-analysis/data:/app/data
       - /opt/stock-analysis/static-export:/app/static-export

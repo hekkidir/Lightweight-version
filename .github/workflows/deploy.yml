@@ -41,23 +41,25 @@ jobs:
       - name: Copy docker-compose.yml to server
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: 204.168.159.237
-          username: root
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
           source: docker-compose.yml
           target: /opt/stock-analysis
 
       - name: Pull image, restart, configure data pipeline
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: 204.168.159.237
-          username: root
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: GH_PAT
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          envs: GH_PAT,DOCKERHUB_USERNAME,DOCKERHUB_TOKEN
           script: |
             cd /opt/stock-analysis
             mkdir -p data static-export
 
+            # The image is private: log in before pulling
+            echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
             docker pull serdardursun/stock-analysis:latest
             docker compose up -d --remove-orphans
             docker image prune -f
@@ -99,31 +101,33 @@ jobs:
             SCRIPT
             chmod +x /opt/stock-analysis/update-data.sh
 
-            # Schedule via a systemd timer: Mon-Fri 16:20 New York time, DST-aware
+            # Schedule via a systemd timer: Mon-Fri 17:15 New York time, DST-aware
             # (Ubuntu cron has no CRON_TZ support, so a fixed UTC cron drifts an hour).
-            cat > /etc/systemd/system/screener-pipeline.service << 'UNIT'
+            # 17:15 runs after the co-hosted tw-screener ingest (16:15 ET, ~40 min)
+            # so the two memory-heavy jobs never overlap on the 4 GB host.
+            sudo tee /etc/systemd/system/screener-pipeline.service > /dev/null << 'UNIT'
             [Unit]
             Description=Screener daily data update
             [Service]
             Type=oneshot
-            Environment=HOME=/root
+            User=deploy
+            Environment=HOME=/home/deploy
             ExecStart=/opt/stock-analysis/update-data.sh
             StandardOutput=append:/var/log/screener-pipeline.log
             StandardError=append:/var/log/screener-pipeline.log
             UNIT
-            cat > /etc/systemd/system/screener-pipeline.timer << 'UNIT'
+            sudo tee /etc/systemd/system/screener-pipeline.timer > /dev/null << 'UNIT'
             [Unit]
             Description=Run screener data update after US market close
             [Timer]
-            OnCalendar=Mon..Fri 16:20 America/New_York
+            OnCalendar=Mon..Fri 17:15 America/New_York
             Persistent=false
             [Install]
             WantedBy=timers.target
             UNIT
-            systemctl daemon-reload
-            systemctl enable --now screener-pipeline.timer
-
-            # Remove the old fixed-UTC cron entry (superseded by the timer)
-            (crontab -l 2>/dev/null | grep -v "^CRON_TZ" | grep -v "update-data.sh") | crontab -
+            sudo systemctl daemon-reload
+            sudo systemctl enable --now screener-pipeline.timer
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
