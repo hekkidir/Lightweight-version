@@ -99,8 +99,31 @@ jobs:
             SCRIPT
             chmod +x /opt/stock-analysis/update-data.sh
 
-            # Install/update cron (Mon-Fri 20:20 UTC = 16:20 ET summer)
-            CRON_JOB="20 20 * * 1-5 /opt/stock-analysis/update-data.sh >> /var/log/screener-pipeline.log 2>&1"
-            (crontab -l 2>/dev/null | grep -v "^CRON_TZ" | grep -v "update-data.sh"; echo "$CRON_JOB") | crontab -
+            # Schedule via a systemd timer: Mon-Fri 16:20 New York time, DST-aware
+            # (Ubuntu cron has no CRON_TZ support, so a fixed UTC cron drifts an hour).
+            cat > /etc/systemd/system/screener-pipeline.service << 'UNIT'
+            [Unit]
+            Description=Screener daily data update
+            [Service]
+            Type=oneshot
+            Environment=HOME=/root
+            ExecStart=/opt/stock-analysis/update-data.sh
+            StandardOutput=append:/var/log/screener-pipeline.log
+            StandardError=append:/var/log/screener-pipeline.log
+            UNIT
+            cat > /etc/systemd/system/screener-pipeline.timer << 'UNIT'
+            [Unit]
+            Description=Run screener data update after US market close
+            [Timer]
+            OnCalendar=Mon..Fri 16:20 America/New_York
+            Persistent=false
+            [Install]
+            WantedBy=timers.target
+            UNIT
+            systemctl daemon-reload
+            systemctl enable --now screener-pipeline.timer
+
+            # Remove the old fixed-UTC cron entry (superseded by the timer)
+            (crontab -l 2>/dev/null | grep -v "^CRON_TZ" | grep -v "update-data.sh") | crontab -
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
